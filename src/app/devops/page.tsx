@@ -1,5 +1,5 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { DevopsPrepWorkspace } from "@/components/devops-prep-workspace";
 
 export default function DevopsPage() {
-  return <PlaceholderPage title="DevOps" />;
+  return <DevopsPrepWorkspace />;
 }
