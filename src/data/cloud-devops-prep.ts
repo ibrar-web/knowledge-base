@@ -44,6 +44,17 @@ export type DockerInterviewSection = {
   questions: DockerInterviewQuestion[];
 };
 
+export type CicdInterviewQuestion = {
+  q: string;
+  a: string;
+  code?: string;
+};
+
+export type CicdInterviewSection = {
+  section: "CI/CD";
+  questions: CicdInterviewQuestion[];
+};
+
 export type CloudDevopsTopic = {
   id: "aws" | "gcp" | "docker" | "cicd";
   label: string;
@@ -1177,6 +1188,214 @@ CMD ["node", "dist/server.js"]`,
       {
         q: "Ephemeral vs persistent container design",
         a: "Containers should usually be treated as disposable compute units. Persistent state belongs in dedicated storage systems unless there is a deliberate operational reason to couple it to the container host.",
+      },
+    ],
+  },
+];
+
+export const cicdInterviewSections: CicdInterviewSection[] = [
+  {
+    section: "CI/CD",
+    questions: [
+      {
+        q: "What is CI/CD and why is it critical in modern DevOps?",
+        a: "CI/CD is the system that turns code changes into validated, releasable artifacts through automated build, test, and deployment workflows. Its real value is reducing delivery risk while increasing release frequency and consistency.",
+      },
+      {
+        q: "What is the difference between CI, Continuous Delivery, and Continuous Deployment?",
+        a: "CI validates and integrates changes continuously, Continuous Delivery keeps software deployable at all times, and Continuous Deployment automatically ships approved changes to production without a manual release gate.",
+      },
+      {
+        q: "What problems does CI/CD solve in distributed teams?",
+        a: "It standardizes validation, reduces environment drift, shortens feedback loops, enforces release discipline, and lets many teams ship to the same platform without relying on manual coordination.",
+      },
+      {
+        q: "What makes a CI/CD pipeline reliable?",
+        a: "Reliable pipelines are deterministic, observable, fast enough for developer trust, secure by default, and designed so failures are actionable rather than noisy or ambiguous.",
+      },
+      {
+        q: "What is a typical CI/CD pipeline architecture?",
+        a: "At a high level, a pipeline moves through source trigger, build, test, artifact publication, environment promotion, deployment, verification, and rollback or approval stages. The details vary by system criticality.",
+      },
+      {
+        q: "How do Git-based workflow triggers shape pipeline design?",
+        a: "Triggers from pull requests, pushes, tags, schedules, and release branches let teams apply different levels of validation. Strong design means matching pipeline depth to the risk of each event type.",
+      },
+      {
+        q: "How do runners or agents work in CI systems?",
+        a: "Runners execute jobs in isolated environments, pull pipeline definitions, run commands, and publish results or artifacts. Their trust model and isolation level are major architecture and security decisions.",
+      },
+      {
+        q: "What happens internally when a pipeline is triggered?",
+        a: "The CI control plane resolves the workflow definition, schedules jobs to runners, injects permissions and secrets based on policy, executes stages, stores artifacts and logs, and updates status back to the SCM or deployment system.",
+      },
+      {
+        q: "Why do artifact generation and storage matter?",
+        a: "Artifacts are the deployable contract between build and deploy stages. If artifacts are not immutable and traceable, every promotion becomes a hidden rebuild risk instead of a trustworthy release step.",
+      },
+      {
+        q: "What is an immutable build?",
+        a: "An immutable build means the exact artifact tested is the artifact deployed. Production should never depend on rebuilding from source at deploy time because that breaks traceability and reproducibility.",
+      },
+      {
+        q: "How should unit, integration, and E2E tests be used in pipelines?",
+        a: "Unit tests provide fast developer feedback, integration tests validate boundaries, and E2E tests validate critical user flows. Mature pipelines place them strategically based on speed, confidence, and cost.",
+      },
+      {
+        q: "How do you design parallel test execution well?",
+        a: "Parallelization improves speed, but only if tests are isolated, shardable, and not contending on shared environments. Otherwise it just creates more expensive flakiness.",
+      },
+      {
+        q: "How should flaky tests be handled?",
+        a: "Flaky tests are a reliability defect in the delivery system. Quarantining may be temporary, but the real fix is root-causing nondeterminism, unstable dependencies, or poor environment assumptions.",
+      },
+      {
+        q: "What are test caching strategies in CI?",
+        a: "Cache dependencies, compiled outputs, and reusable test layers where deterministic. Bad caching can create false confidence, so it must be paired with invalidation rules and reproducibility discipline.",
+      },
+      {
+        q: "What are strong build optimization techniques?",
+        a: "Fail fast, avoid rebuilding unchanged components, cache dependency layers intelligently, parallelize independent tasks, and use artifact reuse rather than re-running expensive work unnecessarily.",
+      },
+      {
+        q: "Rolling vs Blue/Green vs Canary vs A/B deployment tradeoffs",
+        a: "Rolling is simpler but exposes more users during failure, Blue/Green gives safer cutover and rollback, Canary reduces blast radius gradually, and A/B is product experimentation rather than a pure ops strategy.",
+      },
+      {
+        q: "How should risk vs speed be balanced in deployments?",
+        a: "High-change systems need fast pipelines, but critical systems need stronger verification. Good delivery architecture matches deployment strategy to blast radius and business criticality rather than enforcing one pattern everywhere.",
+      },
+      {
+        q: "What makes zero-downtime deployment realistic?",
+        a: "Stateless app tiers, backward-compatible contracts, health-gated rollout, and data migration discipline. Zero downtime is not just a platform feature; it depends on application design too.",
+      },
+      {
+        q: "What does a good rollback mechanism look like?",
+        a: "Rollback should restore the last known good artifact or traffic target quickly, with clear rules around schema changes, config drift, and partial side effects that cannot simply be undone.",
+      },
+      {
+        q: "How should GitHub Actions be evaluated architecturally?",
+        a: "GitHub Actions is tightly integrated with GitHub and strong for repo-centric workflows, but large organizations still need to think about runner trust, workflow reuse, and scaling across many repositories.",
+      },
+      {
+        q: "What is the value of GitLab CI/CD in larger platforms?",
+        a: "GitLab offers strong integrated SCM and pipeline workflows. Its value increases when teams want one platform for source, CI, and release governance rather than stitching together many tools.",
+      },
+      {
+        q: "Declarative vs scripted Jenkins pipelines",
+        a: "Declarative pipelines are easier to standardize and govern; scripted pipelines provide more flexibility but can become difficult to maintain and secure at scale.",
+      },
+      {
+        q: "CircleCI vs ArgoCD vs AWS CodePipeline comparison",
+        a: "CircleCI is CI-focused, ArgoCD is GitOps-focused deployment control, and CodePipeline is AWS-native orchestration. The choice depends on platform alignment and how separate CI and CD need to be.",
+      },
+      {
+        q: "Self-hosted vs cloud runners tradeoffs",
+        a: "Cloud runners reduce maintenance burden, while self-hosted runners give more control over network access, hardware, and caching. The tradeoff is convenience versus governance and specialized capability.",
+      },
+      {
+        q: "What are build artifacts in real production systems?",
+        a: "Artifacts are versioned outputs such as binaries, containers, packages, manifests, or infrastructure plans that become the unit of promotion across environments.",
+      },
+      {
+        q: "What are good Docker image tagging strategies?",
+        a: "Use immutable tags tied to commits or build IDs for traceability, and optionally add human-friendly aliases like semantic versions or `stable` only as secondary references.",
+      },
+      {
+        q: "How should semantic versioning be used in CI/CD?",
+        a: "SemVer is useful when releases are consumer-visible contracts, but internal delivery systems often rely more on immutable build metadata and Git provenance than on human-friendly version numbers alone.",
+      },
+      {
+        q: "Why do artifact repositories matter?",
+        a: "Artifact repositories like Nexus, Artifactory, or ECR provide immutability, retention control, access governance, and supply chain traceability. They are critical release infrastructure, not just storage.",
+      },
+      {
+        q: "How should secrets be managed in pipelines?",
+        a: "Secrets should be short-lived where possible, scoped by environment and job purpose, injected only when needed, and never baked into source, images, or long-lived runner state.",
+      },
+      {
+        q: "Environment variables vs secret stores tradeoffs",
+        a: "Environment variables are operationally simple, but secret stores are safer and more governable for sensitive credentials. Mature systems usually combine both, with variables referencing retrieved secrets rather than holding them permanently.",
+      },
+      {
+        q: "How do you prevent credential leakage in CI/CD?",
+        a: "Use masked secrets, least-privilege tokens, isolated runners, restricted PR execution paths, and explicit review of logs and artifacts so secrets do not leak through command output or cached state.",
+      },
+      {
+        q: "How should SAST, DAST, and dependency scanning fit into pipelines?",
+        a: "They should be placed where they reduce risk without making pipelines unusably slow. Not every scan must block every change, but critical findings need a governed response path.",
+      },
+      {
+        q: "Why is supply chain security now a core CI/CD topic?",
+        a: "Because the pipeline controls source, artifacts, dependencies, and deployment authority. A compromised CI/CD system can become a direct production compromise.",
+      },
+      {
+        q: "How do matrix builds and parallel pipelines scale delivery?",
+        a: "They let teams validate multiple environments, runtimes, or services at once, but they require strong artifact and cache discipline to avoid exploding cost and operational noise.",
+      },
+      {
+        q: "How do you reduce build time in large systems?",
+        a: "Use change-based execution, artifact reuse, shared caches, monorepo-aware task graphs, and eliminate unnecessary work before adding more compute.",
+      },
+      {
+        q: "How should pipeline failures be handled gracefully?",
+        a: "Failures should fail fast, provide precise context, preserve artifacts or logs for diagnosis, and avoid leaving environments in half-deployed or ambiguous states.",
+      },
+      {
+        q: "When do retry mechanisms help in CI systems?",
+        a: "Retries help with transient network or infrastructure instability, but they should not hide deterministic failures or flaky tests. Reliability comes from fixing causes, not retrying everything.",
+      },
+      {
+        q: "Why are idempotent deployments important?",
+        a: "Idempotent deployments allow safe retries and reduce the risk of partial failure causing different outcomes on repeated execution. This is essential in distributed and multi-stage release systems.",
+      },
+      {
+        q: "What does pipeline observability look like?",
+        a: "It includes execution traces, queue times, stage durations, artifact lineage, runner metrics, and failure classification. CI/CD should be observable like any other production system.",
+      },
+      {
+        q: "How should CI/CD be designed for microservices?",
+        a: "Pipelines must support independent service delivery while still validating compatibility, shared platform policies, and cross-service release safety where dependencies exist.",
+      },
+      {
+        q: "How do multi-environment pipelines work well?",
+        a: "Use the same artifact across dev, staging, and prod with environment-specific config and approval rules. Rebuilding between environments breaks traceability.",
+      },
+      {
+        q: "GitOps vs traditional CI/CD",
+        a: "Traditional CI/CD often pushes deployments directly, while GitOps treats desired state in Git as the deployment source of truth. GitOps improves auditability and pull-based control, but adds operational model changes.",
+      },
+      {
+        q: "What is progressive delivery in Kubernetes?",
+        a: "Progressive delivery uses staged rollout strategies such as canary, automated health evaluation, and traffic shaping to reduce release risk in cluster-based systems.",
+      },
+      {
+        q: "How do feature flags fit into deployment pipelines?",
+        a: "Feature flags decouple deployment from release. They reduce rollout risk, but they also add operational complexity and require cleanup discipline to avoid flag debt.",
+      },
+      {
+        q: "What should multi-region deployment pipelines account for?",
+        a: "They must account for staggered rollout, region-specific health validation, rollback coordination, config parity, and the fact that failures may affect regions differently.",
+      },
+      {
+        q: "What are event-driven CI/CD pipelines?",
+        a: "Event-driven pipelines react to repository, registry, or environment events instead of purely linear triggers. They improve automation but require clear orchestration and failure visibility.",
+      },
+      {
+        q: "How should Terraform and IaC integrate with CI/CD?",
+        a: "Treat infrastructure changes as versioned code, run plan and policy checks in CI, and apply with controlled approvals and drift awareness. IaC delivery should be held to the same reliability standard as application delivery.",
+      },
+      {
+        q: "Why are ephemeral environments valuable per PR?",
+        a: "They let teams validate behavior in realistic isolated environments before merge. The tradeoff is cost, environment orchestration overhead, and cleanup discipline.",
+      },
+      {
+        q: "What are preview deployments and when do they help?",
+        a: "Preview deployments are short-lived environments tied to pull requests. They help product, QA, and reviewers validate changes beyond test output, especially for UI and integrated systems.",
+      },
+      {
+        q: "What does pipeline orchestration at scale require?",
+        a: "It requires workflow reuse, centralized policy, secret governance, artifact lineage, runner capacity planning, and strong boundaries between team autonomy and platform standards.",
       },
     ],
   },
