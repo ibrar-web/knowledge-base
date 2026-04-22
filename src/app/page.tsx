@@ -166,11 +166,15 @@ export default function HomePage() {
             Strong expertise in automation, system design, CI/CD, and production-grade systems.
           </p>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
             <InfoTile label="Location" value="Lahore, Pakistan" />
             <InfoTile label="Phone" value="+92 315 6262990" />
-            <InfoTile label="Email" value="ibrarjut1997@gmail.com" />
-            <InfoTile label="LinkedIn" value="linkedin.com/in/ibrarhussain62" />
+            <InfoTile label="Email" value="ibrarjut1997@gmail.com" href="mailto:ibrarjut1997@gmail.com" />
+            <InfoTile
+              label="LinkedIn"
+              value="www.linkedin.com/in/ibrarhussain62/"
+              href="https://www.linkedin.com/in/ibrarhussain62/"
+            />
           </div>
         </div>
 
@@ -311,13 +315,26 @@ export default function HomePage() {
   );
 }
 
-function InfoTile({ label, value }: { label: string; value: string }) {
+function InfoTile({ label, value, href }: { label: string; value: string; href?: string }) {
+  const content = href ? (
+    <a
+      href={href}
+      target={href.startsWith("http") ? "_blank" : undefined}
+      rel={href.startsWith("http") ? "noreferrer" : undefined}
+      className="mt-2 block break-all text-sm leading-6 text-[var(--color-text-primary)] transition duration-200 hover:text-white"
+    >
+      {value}
+    </a>
+  ) : (
+    <p className="mt-2 break-words text-sm leading-6 text-[var(--color-text-primary)]">{value}</p>
+  );
+
   return (
-    <article className="rounded-[24px] border border-[var(--color-border)] bg-slate-950/25 p-4">
+    <article className="min-w-0 rounded-[24px] border border-[var(--color-border)] bg-slate-950/25 p-4">
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-text-muted)]">
         {label}
       </p>
-      <p className="mt-2 text-sm leading-6 text-[var(--color-text-primary)]">{value}</p>
+      {content}
     </article>
   );
 }

@@ -50,64 +50,65 @@ export function TopNavMenu() {
         {isOpen ? <CloseIcon /> : <MenuIcon />}
       </button>
 
-      <div
-        className={`fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-sm transition duration-300 ${
-          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
-        }`}
-        aria-hidden={!isOpen}
-      />
+      {isOpen ? (
+        <>
+          <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            className="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-sm transition duration-300"
+            aria-label="Close navigation overlay"
+          />
 
-      <div
-        className={`pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4 transition duration-300 sm:px-6 ${
-          isOpen ? "translate-y-0 opacity-100" : "-translate-y-6 opacity-0"
-        }`}
-      >
-        <div
-          id="top-navigation-panel"
-          ref={panelRef}
-          className="pointer-events-auto w-full max-w-5xl rounded-[28px] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-sidebar)_92%,transparent)] p-5 shadow-[var(--shadow-panel)] backdrop-blur-xl"
-        >
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium uppercase tracking-[0.24em] text-[var(--color-text-muted)]">
-                Navigate
-              </p>
-              <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-                Interview Prep Hub sections
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-white/5 text-[var(--color-text-primary)] transition duration-200 hover:border-[var(--color-primary-indigo)] hover:bg-white/10"
-              aria-label="Close navigation menu"
+          <div className="fixed inset-x-0 top-0 z-50 flex translate-y-0 justify-center px-4 pt-4 opacity-100 transition duration-300 sm:px-6">
+            <div
+              id="top-navigation-panel"
+              ref={panelRef}
+              className="w-full max-w-5xl rounded-[28px] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-sidebar)_92%,transparent)] p-5 shadow-[var(--shadow-panel)] backdrop-blur-xl"
             >
-              <CloseIcon />
-            </button>
-          </div>
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium uppercase tracking-[0.24em] text-[var(--color-text-muted)]">
+                    Navigate
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+                    Interview Prep Hub sections
+                  </p>
+                </div>
 
-          <nav className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {navigationItems.map((item) => {
-              const isActive = pathname === item.href;
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`rounded-2xl border px-4 py-3 text-sm font-medium transition duration-200 ${
-                    isActive
-                      ? "border-[var(--color-primary-blue)] bg-[color-mix(in_srgb,var(--color-primary-blue)_16%,transparent)] text-white"
-                      : "border-[var(--color-border)] bg-white/5 text-[var(--color-text-secondary)] hover:border-[var(--color-primary-indigo)] hover:bg-white/10 hover:text-[var(--color-text-primary)]"
-                  }`}
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-white/5 text-[var(--color-text-primary)] transition duration-200 hover:border-[var(--color-primary-indigo)] hover:bg-white/10"
+                  aria-label="Close navigation menu"
                 >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      </div>
+                  <CloseIcon />
+                </button>
+              </div>
+
+              <nav className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {navigationItems.map((item) => {
+                  const isActive = pathname === item.href;
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`rounded-2xl border px-4 py-3 text-sm font-medium transition duration-200 ${
+                        isActive
+                          ? "border-[var(--color-primary-blue)] bg-[color-mix(in_srgb,var(--color-primary-blue)_16%,transparent)] text-white"
+                          : "border-[var(--color-border)] bg-white/5 text-[var(--color-text-secondary)] hover:border-[var(--color-primary-indigo)] hover:bg-white/10 hover:text-[var(--color-text-primary)]"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+          </div>
+        </>
+      ) : null}
     </>
   );
 }
