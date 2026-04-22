@@ -1,5 +1,5 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { FrontendPrepWorkspace } from "@/components/frontend-prep-workspace";
 
 export default function FrontendPage() {
-  return <PlaceholderPage title="Frontend" />;
+  return <FrontendPrepWorkspace />;
 }
