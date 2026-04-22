@@ -1,37 +1,37 @@
+import type { CSSProperties, ReactNode } from "react";
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Manrope, Space_Grotesk } from "next/font/google";
-import { AppProviders } from "@/components/layout/app-providers";
-import { AppShell } from "@/components/layout/app-shell";
+
+import { AppHeader } from "@/components/app-header";
+import { theme } from "../../styles/theme";
+
 import "./globals.css";
-
-const bodyFont = Manrope({
-  variable: "--font-body",
-  subsets: ["latin"],
-});
-
-const displayFont = Space_Grotesk({
-  variable: "--font-display",
-  subsets: ["latin"],
-});
-
-const monoFont = IBM_Plex_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-});
 
 export const metadata: Metadata = {
   title: "Interview Prep Hub",
-  description: "Static interview preparation hub for frontend, backend, cloud, DevOps, AI, Git, and system design.",
+  description: "Developer profile dashboard and interview preparation workspace for Ibrar Hussain.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+const cssVariables: CSSProperties = {
+  ["--color-background-main" as string]: theme.colors.background.main,
+  ["--color-card" as string]: theme.colors.background.card,
+  ["--color-sidebar" as string]: theme.colors.background.sidebar,
+  ["--color-primary-blue" as string]: theme.colors.primary.blue,
+  ["--color-primary-indigo" as string]: theme.colors.primary.indigo,
+  ["--color-text-primary" as string]: theme.colors.text.primary,
+  ["--color-text-secondary" as string]: theme.colors.text.secondary,
+  ["--color-text-muted" as string]: theme.colors.text.muted,
+  ["--color-border" as string]: theme.colors.border,
+  ["--font-sans" as string]: theme.typography.fontFamily,
+  ["--shadow-card" as string]: theme.shadows.card,
+  ["--shadow-panel" as string]: theme.shadows.panel,
+};
+
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${bodyFont.variable} ${displayFont.variable} ${monoFont.variable}`}>
-      <body>
-        <AppProviders>
-          <AppShell>{children}</AppShell>
-        </AppProviders>
+    <html lang="en">
+      <body style={cssVariables} className="antialiased">
+        <AppHeader />
+        {children}
       </body>
     </html>
   );
