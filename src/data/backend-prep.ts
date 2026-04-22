@@ -33,6 +33,20 @@ export type NestInterviewSection = {
   questions: NestInterviewQuestion[];
 };
 
+export type FastApiInterviewQuestion = {
+  q: string;
+  a: string;
+  code?: string;
+};
+
+export type FastApiInterviewSection = {
+  section:
+    | "Core Concepts"
+    | "Architecture & Internals"
+    | "Advanced Backend Systems & Production Design";
+  questions: FastApiInterviewQuestion[];
+};
+
 export type BackendPrepTopic = {
   id: "nodejs" | "express" | "nestjs" | "fastapi";
   label: string;
@@ -933,6 +947,236 @@ export const nestInterviewSections: NestInterviewSection[] = [
       {
         q: "What is the API gateway role in a NestJS microservices ecosystem?",
         a: "The API gateway acts as the edge boundary for routing, auth, aggregation, and client-facing concerns while internal services stay focused on domain capabilities.",
+      },
+    ],
+  },
+];
+
+export const fastApiInterviewSections: FastApiInterviewSection[] = [
+  {
+    section: "Core Concepts",
+    questions: [
+      {
+        q: "What is FastAPI and why is it used?",
+        a: "FastAPI is a Python API framework built for typed request handling, async support, and strong developer ergonomics. Teams use it when they want modern API contracts with good performance and low boilerplate.",
+      },
+      {
+        q: "FastAPI vs Flask vs Django differences",
+        a: "Flask is minimal and flexible, Django is a batteries-included web framework, and FastAPI is API-focused with typed validation and async-first design. The right choice depends on system shape, not popularity.",
+      },
+      {
+        q: "What makes FastAPI fast?",
+        a: "Its performance comes from the ASGI stack, efficient request handling, and low-friction typed validation. The framework is fast, but real throughput still depends on I/O behavior, database design, and deployment choices.",
+      },
+      {
+        q: "What is ASGI and how is it different from WSGI?",
+        a: "ASGI supports async request handling, long-lived connections, and modern concurrency models. WSGI is synchronous and fits older request-response server models better than real-time or async-heavy workloads.",
+      },
+      {
+        q: "What are Pydantic models and why do they matter?",
+        a: "Pydantic models define typed input and output contracts, validate payloads, and shape data at the API boundary. They improve correctness and reduce manual parsing logic.",
+      },
+      {
+        q: "How do path parameters, query parameters, and request bodies work in FastAPI?",
+        a: "FastAPI infers them from function signatures and type annotations. That keeps transport contracts explicit and lets validation happen before business logic runs.",
+      },
+      {
+        q: "How does dependency injection work in FastAPI?",
+        a: "Dependencies are declared in function signatures and resolved by the framework per request or per call site. This is useful for auth, configuration, sessions, and reusable request context.",
+      },
+      {
+        q: "Why is automatic OpenAPI / Swagger generation useful?",
+        a: "It keeps API documentation aligned with code contracts and reduces drift between implementation and integration docs. It is valuable for internal platforms and consumer-facing APIs alike.",
+      },
+    ],
+  },
+  {
+    section: "Architecture & Internals",
+    questions: [
+      {
+        q: "How does FastAPI handle the request lifecycle?",
+        a: "A request enters the ASGI server, passes through middleware, gets routed, dependencies are resolved, validation runs, the endpoint executes, and the response is serialized or an exception handler takes over.",
+      },
+      {
+        q: "What is the ASGI server flow with Uvicorn or Hypercorn?",
+        a: "The ASGI server accepts network connections, builds the ASGI scope, invokes the app callable, and coordinates async send/receive events across the request lifecycle.",
+      },
+      {
+        q: "How does async/await work in FastAPI?",
+        a: "Async endpoints let the event loop switch away while waiting on non-blocking I/O. This improves concurrency for I/O-bound systems, but does not make CPU-heavy code magically faster.",
+      },
+      {
+        q: "How does the event loop matter in Python async apps?",
+        a: "The event loop is the coordination layer for async tasks. If blocking work runs inside it, request latency rises and concurrency gains disappear even if the code looks async.",
+      },
+      {
+        q: "How does FastAPI’s dependency injection system work internally?",
+        a: "FastAPI builds a dependency graph from function signatures, resolves nested dependencies in order, and caches request-scoped values where appropriate for that resolution path.",
+      },
+      {
+        q: "How does middleware execution flow work in FastAPI?",
+        a: "Middleware wraps the ASGI app and executes around request handling. It is best for cross-cutting transport concerns, not for burying application logic.",
+      },
+      {
+        q: "How does routing work internally in FastAPI?",
+        a: "Routing is inherited from Starlette-style path matching and endpoint registration. FastAPI layers validation, dependency resolution, and schema generation on top of that routing base.",
+      },
+      {
+        q: "How does FastAPI integrate with Starlette?",
+        a: "FastAPI uses Starlette for the core ASGI app, middleware, routing, and response infrastructure, while adding typed validation, dependency injection, and OpenAPI generation.",
+      },
+      {
+        q: "What is the Pydantic validation pipeline?",
+        a: "Incoming data is parsed against annotated models and types before entering application logic. That keeps invalid transport payloads from leaking deeper into the service layer.",
+      },
+      {
+        q: "When should you use async vs sync endpoints?",
+        a: "Use async when the handler relies on non-blocking I/O end to end. Use sync when the code is CPU-bound or depends on blocking libraries that would otherwise stall the event loop.",
+      },
+      {
+        q: "Blocking vs non-blocking I/O tradeoff in FastAPI",
+        a: "Non-blocking I/O improves concurrency for waiting-heavy workloads. Blocking calls inside async handlers undermine that model and should be isolated to threads, workers, or separate services.",
+      },
+      {
+        q: "When would you use ThreadPoolExecutor in FastAPI?",
+        a: "Use it when you must call blocking code from an async application and cannot replace that dependency. It is a bridge, not a primary scaling strategy.",
+      },
+      {
+        q: "What are common performance pitfalls in async Python?",
+        a: "Blocking libraries, oversized JSON work, poor connection reuse, excessive task fan-out, and assuming async alone solves downstream bottlenecks are the most common failures.",
+      },
+    ],
+  },
+  {
+    section: "Advanced Backend Systems & Production Design",
+    questions: [
+      {
+        q: "SQLAlchemy vs Tortoise ORM vs Prisma tradeoffs in Python systems",
+        a: "SQLAlchemy gives deep control and maturity, Tortoise is async-oriented but lighter weight, and Prisma-like approaches emphasize schema-driven ergonomics. The tradeoff is abstraction style versus control and ecosystem depth.",
+      },
+      {
+        q: "How should session management work in FastAPI?",
+        a: "Session lifecycle should be explicit and controlled by dependencies or service boundaries, not scattered across endpoints. Database sessions should be short-lived and request-scoped.",
+      },
+      {
+        q: "Why does connection pooling matter in FastAPI backends?",
+        a: "Pooling avoids reconnect overhead and protects databases from collapse under concurrent traffic. Async apps still need disciplined pool sizing relative to worker count and dependency limits.",
+      },
+      {
+        q: "How should transaction handling be designed?",
+        a: "Transactions should wrap business operations in the service layer, not controller-like endpoint code. The real design question is consistency boundary, not just ORM syntax.",
+      },
+      {
+        q: "How do you avoid N+1 query problems?",
+        a: "Use eager loading, query shaping, batching, and profiling. N+1 is usually a data-access design problem rather than a framework problem.",
+      },
+      {
+        q: "How should JWT authentication be implemented in FastAPI?",
+        a: "Use dependency-based auth boundaries, token verification, and explicit user-context creation. JWTs are useful, but revocation, rotation, and claim trust must be designed carefully.",
+      },
+      {
+        q: "What is OAuth2 password flow and when is it appropriate?",
+        a: "It is a credential-based token flow typically used for trusted first-party clients. It is usually not the right choice for third-party delegated auth scenarios.",
+      },
+      {
+        q: "How does dependency-based authentication help in FastAPI?",
+        a: "It keeps authentication reusable and explicit by composing auth checks into endpoint signatures or routers rather than duplicating logic across handlers.",
+      },
+      {
+        q: "How should RBAC be designed in FastAPI?",
+        a: "RBAC should be implemented as policy-aware authorization on top of verified identity, ideally through reusable dependencies or service-layer policies rather than ad hoc inline checks.",
+      },
+      {
+        q: "How should CORS and security headers be handled?",
+        a: "CORS should be scoped to real clients and environments, and security headers should be added through middleware or gateway controls. Neither replaces validation or auth design.",
+      },
+      {
+        q: "Why is FastAPI considered high-performance in production?",
+        a: "Because it combines an efficient ASGI stack with low-overhead API ergonomics. But real performance depends more on architecture, dependency behavior, and deployment than framework benchmarks.",
+      },
+      {
+        q: "How do Uvicorn workers and multi-process scaling work?",
+        a: "Each worker is a separate process with its own event loop. Scaling workers improves throughput across CPU cores, but also increases memory use and coordination needs.",
+      },
+      {
+        q: "What is the Gunicorn + Uvicorn worker model?",
+        a: "Gunicorn can supervise multiple Uvicorn worker processes, combining Python process management with ASGI serving. It is common when teams want mature process control around async apps.",
+      },
+      {
+        q: "What are practical caching strategies in FastAPI systems?",
+        a: "Use Redis or similar for shared cache, idempotency, rate limiting, and hot reads. In-process cache is only useful when instance-local inconsistency is acceptable.",
+      },
+      {
+        q: "When should you use response streaming or chunked responses?",
+        a: "Use streaming for large payloads, incremental generation, or low-memory transfer paths. It improves memory safety but complicates error semantics and connection management.",
+      },
+      {
+        q: "BackgroundTasks vs Celery tradeoffs",
+        a: "BackgroundTasks are fine for lightweight post-response work inside the same process. Celery or external workers are better for durable, retryable, long-running, or high-scale background jobs.",
+      },
+      {
+        q: "What should structured logging look like in FastAPI?",
+        a: "Use structured logs with correlation IDs, request context, and environment-aware levels. Logging should support tracing and incident response, not just console output.",
+      },
+      {
+        q: "How should error handling be designed with exception handlers?",
+        a: "Use centralized exception handlers to standardize failure mapping, logging, and client-safe responses. This keeps transport behavior consistent across the application.",
+      },
+      {
+        q: "Why are health checks and readiness probes important?",
+        a: "They help orchestrators and operators distinguish a live process from a ready service. Good checks include dependency readiness, not just application startup success.",
+      },
+      {
+        q: "What are environment configuration best practices?",
+        a: "Centralize config, validate it at startup, separate secrets from code, and keep environment differences declarative rather than hidden in conditional logic.",
+      },
+      {
+        q: "How should API versioning be handled?",
+        a: "Prefer backward-compatible evolution where possible, then version explicitly when contracts diverge. Versioning is a product and integration strategy, not just a URL format choice.",
+      },
+      {
+        q: "What are good rate limiting strategies for FastAPI services?",
+        a: "Apply rate limits where abuse or dependency protection matters, and use shared state like Redis for distributed enforcement when running multiple instances.",
+      },
+      {
+        q: "How does FastAPI fit in a microservices architecture?",
+        a: "FastAPI works well as a service boundary when APIs are typed, I/O-heavy, and independently deployable. The hard problems remain contract evolution, observability, and cross-service consistency.",
+      },
+      {
+        q: "How should event-driven architecture be approached with FastAPI?",
+        a: "Use FastAPI as the synchronous ingress layer when appropriate, and push asynchronous workflows through brokers or queues. The event bus is part of the architecture, not just a library integration.",
+      },
+      {
+        q: "How do queues and async processing fit into FastAPI systems?",
+        a: "Queues decouple request latency from slow work, absorb bursts, and improve resilience. They also require idempotency, retries, dead-letter strategy, and operational visibility.",
+      },
+      {
+        q: "What service-to-service communication patterns matter?",
+        a: "Choose between sync HTTP, async messaging, or hybrid models based on latency needs, consistency requirements, and failure isolation. Simplicity usually wins unless scale forces complexity.",
+      },
+      {
+        q: "What is the API Gateway role with FastAPI services?",
+        a: "The gateway handles edge concerns like auth, routing, aggregation, and policy enforcement so internal FastAPI services remain focused on domain behavior.",
+      },
+      {
+        q: "How do WebSockets fit into FastAPI production systems?",
+        a: "FastAPI can support WebSockets well, but real-time systems still need scaling, connection lifecycle management, fanout strategy, and backpressure-aware design.",
+      },
+      {
+        q: "What are the tradeoffs in streaming large file uploads?",
+        a: "Streaming to disk or object storage is safer for memory and throughput, while buffering is simpler but risky under concurrency or large payload sizes.",
+      },
+      {
+        q: "What are advanced dependency injection patterns in FastAPI?",
+        a: "Use layered dependencies for auth, tenancy, sessions, and policy context, but keep the graph understandable. Over-composed DI can become hard to reason about in large codebases.",
+      },
+      {
+        q: "How should large FastAPI apps be structured modularly?",
+        a: "Organize by domain with clear routers, schemas, services, repositories, and shared infrastructure modules. Avoid one giant routes package tied directly to persistence details.",
+      },
+      {
+        q: "How would you design a multi-tenant system in FastAPI?",
+        a: "Resolve tenant context early, isolate data access by tenant boundaries, enforce authorization consistently, and make sure caching, logging, and background processing remain tenant-aware.",
       },
     ],
   },
