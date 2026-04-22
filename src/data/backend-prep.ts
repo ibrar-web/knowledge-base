@@ -5,6 +5,20 @@ export type BackendPrepQuestion = {
   useCase: string;
 };
 
+export type ExpressInterviewQuestion = {
+  q: string;
+  a: string;
+  code?: string;
+};
+
+export type ExpressInterviewSection = {
+  section:
+    | "Core Concepts"
+    | "Architecture & Internals"
+    | "Performance, Security & Production Systems";
+  questions: ExpressInterviewQuestion[];
+};
+
 export type BackendPrepTopic = {
   id: "nodejs" | "express" | "nestjs" | "fastapi";
   label: string;
@@ -450,6 +464,227 @@ export const backendPrepTopics: BackendPrepTopic[] = [
           "Framework-level async support helps, but scaling still depends on architecture. Senior engineers ensure request handlers remain lightweight, background jobs are handled outside request threads, caching is applied strategically, and deployment settings such as worker model and connection limits match workload behavior. They also watch latency percentiles, queue depth, and dependency saturation rather than assuming app-level throughput is the only metric that matters.",
         useCase:
           "A FastAPI service can run behind a load balancer with multiple workers, store shared session or rate-limit data externally, and push report generation to async workers.",
+      },
+    ],
+  },
+];
+
+export const expressInterviewSections: ExpressInterviewSection[] = [
+  {
+    section: "Core Concepts",
+    questions: [
+      {
+        q: "What is Express.js and why is it used?",
+        a: "Express is a minimal Node.js web framework used when teams want direct control over HTTP handling, middleware composition, and API structure without heavy framework opinion.",
+      },
+      {
+        q: "How does Express handle the request-response lifecycle?",
+        a: "A request enters the Node HTTP server, Express wraps the request and response objects, runs matching middleware and route handlers in order, then completes the response or forwards an error path.",
+      },
+      {
+        q: "What is middleware in Express?",
+        a: "Middleware is a function in the request pipeline that can inspect, mutate, short-circuit, or delegate request handling. It is the core composition model of Express.",
+      },
+      {
+        q: "What are the main types of middleware in Express?",
+        a: "Application middleware applies globally, router middleware is scoped to route modules, and error-handling middleware centralizes failure response and observability logic.",
+      },
+      {
+        q: "How does routing work in Express?",
+        a: "Express matches HTTP method and path patterns against registered handlers, then executes the matching middleware stack in definition order. Route organization becomes an architecture problem as the system grows.",
+      },
+      {
+        q: "What is the difference between app.use, app.get, and router?",
+        a: "`app.use` mounts middleware or routers broadly, `app.get` registers a GET route handler, and `router` creates modular route scopes so features do not collapse into one global app file.",
+      },
+      {
+        q: "How do request and response objects work internally?",
+        a: "Express extends Node’s native `IncomingMessage` and `ServerResponse` objects with convenience helpers like params, body parsing access, status setters, JSON helpers, and header utilities.",
+      },
+      {
+        q: "How does Express handle async errors?",
+        a: "Async errors must be forwarded into the middleware chain, typically by wrapper utilities or framework support patterns. If not propagated correctly, promise rejections can bypass centralized error handling.",
+      },
+      {
+        q: "How should you think about authentication vs authorization in Express?",
+        a: "Authentication proves identity; authorization decides what that identity may do. In production, these should be distinct layers rather than mixed into one middleware blob.",
+      },
+      {
+        q: "JWT vs session-based auth tradeoffs",
+        a: "JWTs help with distributed stateless APIs but complicate revocation and rotation. Sessions simplify invalidation and server-side control but require shared session storage at scale.",
+      },
+    ],
+  },
+  {
+    section: "Architecture & Internals",
+    questions: [
+      {
+        q: "How does the Node.js event loop matter in Express?",
+        a: "Every Express request shares the same event loop in a process, so blocking CPU work or bad sync code can increase latency for unrelated requests across the whole instance.",
+      },
+      {
+        q: "How does the middleware execution pipeline work?",
+        a: "Express builds a chain of middleware layers and walks them sequentially. Each layer can end the response, call `next()`, or hand off an error, which makes ordering and side effects critical.",
+      },
+      {
+        q: "How does Express handle concurrency?",
+        a: "Express itself does not create multithreaded request handling. It benefits from Node’s asynchronous I/O model, where many in-flight requests coexist while the event loop coordinates callbacks and promise continuations.",
+      },
+      {
+        q: "What happens step by step when a request hits an Express server?",
+        a: "The Node HTTP server accepts the socket, Express matches middleware, parsers and auth layers run, the route handler executes business logic, and the response is serialized or an error pipeline is triggered.",
+      },
+      {
+        q: "How should error handling architecture be designed in Express?",
+        a: "Use centralized error middleware, consistent operational error types, trace-aware logging, and explicit mapping from internal failures to safe external HTTP responses.",
+      },
+      {
+        q: "How does Express manage routes internally?",
+        a: "Express stores route layers and middleware stacks internally and iterates through them during matching. That simplicity is powerful, but route sprawl can turn matching and ownership into maintenance problems.",
+      },
+      {
+        q: "How does async/await work with Express handlers?",
+        a: "Async handlers return promises, but Express does not automatically make all async failures safe in every pattern. Teams usually standardize wrappers or helper abstractions for consistent propagation.",
+        code: `const asyncHandler =
+  (fn) => (req, res, next) =>
+    Promise.resolve(fn(req, res, next)).catch(next);`,
+      },
+      {
+        q: "How does Express integrate with the Node HTTP module?",
+        a: "Express is essentially a request listener layered on top of Node’s HTTP primitives. It does not replace Node networking; it organizes application logic around it.",
+      },
+      {
+        q: "How do databases usually integrate with Express?",
+        a: "Express should stay as the transport layer while database access lives in services or repositories. The handler coordinates the request, but the data access layer owns query logic and transactions.",
+      },
+      {
+        q: "ORM vs raw queries tradeoffs",
+        a: "ORMs accelerate consistency and developer speed, but can hide performance characteristics. Raw queries offer control and efficiency but raise the burden of safety, maintainability, and duplication.",
+      },
+      {
+        q: "What is connection pooling and why does it matter?",
+        a: "Pooling reuses database connections instead of opening one per request. Without it, latency and resource usage degrade quickly under concurrent traffic.",
+      },
+      {
+        q: "How should transaction handling work in Express APIs?",
+        a: "Transactions should be scoped to the business operation, not the route file. The application/service layer should own commit, rollback, and consistency rules.",
+      },
+      {
+        q: "How do you handle race conditions in APIs?",
+        a: "Use database constraints, optimistic locking, idempotency keys, transactional updates, or queue-based serialization depending on the consistency requirement.",
+      },
+      {
+        q: "How do you design scalable REST APIs in Express?",
+        a: "Design around stable resource models, explicit versioning, pagination, validation, predictable error contracts, and domain-based routing boundaries rather than ad hoc endpoint growth.",
+      },
+    ],
+  },
+  {
+    section: "Performance, Security & Production Systems",
+    questions: [
+      {
+        q: "How do you scale Express apps horizontally?",
+        a: "Keep instances stateless, externalize sessions and caches, run multiple replicas behind a load balancer, and move long-running work to background systems.",
+      },
+      {
+        q: "What is clustering in Node.js for Express apps?",
+        a: "Clustering runs multiple Node processes on one host to use multiple CPU cores. It improves throughput but introduces operational concerns like sticky sessions and per-process memory isolation.",
+      },
+      {
+        q: "What load balancing strategies matter for Express?",
+        a: "Use health-checked distribution across stateless instances, and add stickiness only when unavoidable. The best strategy depends on websocket use, session design, and deployment topology.",
+      },
+      {
+        q: "What are practical caching strategies in Express systems?",
+        a: "Use Redis or similar stores for hot reads, session data, rate limiting, and computed responses, but only where staleness and invalidation strategy are clearly defined.",
+      },
+      {
+        q: "How do you avoid blocking the event loop?",
+        a: "Keep handlers I/O-oriented, move CPU-heavy work to workers or separate services, stream large payloads, and avoid synchronous filesystem or crypto operations in request paths.",
+      },
+      {
+        q: "What are good rate limiting strategies?",
+        a: "Apply limits by IP, user, route, or token class depending on abuse risk. Distributed limit storage is usually required in horizontally scaled systems.",
+      },
+      {
+        q: "How should middleware-based auth flow be designed?",
+        a: "Auth middleware should validate identity early, attach a trusted user context, and leave resource-level authorization to later domain-specific checks instead of overloading one global middleware.",
+      },
+      {
+        q: "Why does CORS matter?",
+        a: "CORS controls which browser origins may access your API. It is not a full security layer, but misconfiguration can unintentionally expose browser-consumable endpoints.",
+      },
+      {
+        q: "What is Helmet and why use security headers?",
+        a: "Helmet helps set safer default HTTP headers. It is useful hardening, but it does not replace input validation, auth, secure deployment, or abuse protection.",
+      },
+      {
+        q: "Why are input validation and sanitization critical?",
+        a: "Validation protects application contracts and stops malformed input early. Sanitization reduces downstream injection and unsafe rendering risks, especially around user-generated content and query construction.",
+      },
+      {
+        q: "How do you prevent SQL injection and NoSQL injection?",
+        a: "Use parameterized queries, schema validation, safe query builders, strict operator whitelisting, and never trust raw user input in query construction.",
+      },
+      {
+        q: "What logging strategy works well in production Express apps?",
+        a: "Use structured logging with correlation IDs and log levels tuned for production. The goal is searchable operational context, not printing strings to stdout everywhere.",
+      },
+      {
+        q: "What should monitoring and observability include?",
+        a: "Track latency, error rates, saturation, request traces, logs, dependency health, and business-critical signals so incidents can be detected and explained quickly.",
+      },
+      {
+        q: "Why do health check endpoints matter?",
+        a: "Health checks let orchestrators and operators distinguish healthy instances from degraded ones. Good checks should reflect service readiness, not just process existence.",
+      },
+      {
+        q: "How should graceful shutdown work?",
+        a: "Stop accepting new requests, allow in-flight requests to complete, close external connections cleanly, and exit within a bounded timeout so deployments do not drop traffic abruptly.",
+      },
+      {
+        q: "What are environment configuration best practices?",
+        a: "Validate config at startup, keep secrets out of source control, separate environment-specific values clearly, and fail fast if required settings are missing or invalid.",
+      },
+      {
+        q: "How should API versioning be approached?",
+        a: "Version only when compatibility requires it. Prefer additive changes where possible, and use explicit versioning when contract evolution cannot remain backward compatible.",
+      },
+      {
+        q: "Microservices vs monolith with Express",
+        a: "A monolith is usually simpler to operate early on. Microservices help when domain boundaries, scaling needs, or team autonomy justify the additional distributed systems complexity.",
+      },
+      {
+        q: "What does event-driven architecture look like around Express systems?",
+        a: "Express often acts as the synchronous API edge while events propagate domain changes asynchronously through queues or brokers for downstream processing.",
+      },
+      {
+        q: "How do queue systems like RabbitMQ or Kafka fit into Express backends?",
+        a: "Queues offload slow or bursty work, improve resilience, and decouple services. The tradeoff is eventual consistency, operational overhead, and the need for idempotent consumers.",
+      },
+      {
+        q: "How are WebSockets used with Express in real-time systems?",
+        a: "Express often handles the HTTP setup layer while websocket infrastructure manages persistent connections. Real-time architecture also needs scaling, stickiness, and backpressure design.",
+      },
+      {
+        q: "What are the tradeoffs in file upload handling?",
+        a: "Streaming uploads are more memory-safe and production-ready for large files, while buffering in memory is simpler but risky under concurrency and large payload sizes.",
+      },
+      {
+        q: "When should you use streaming responses in Express?",
+        a: "Use streaming when payloads are large, incremental, or latency-sensitive. It improves memory usage and time-to-first-byte but complicates error handling and connection lifecycle management.",
+      },
+      {
+        q: "What are common middleware chaining pitfalls?",
+        a: "Calling `next()` after sending a response, mutating shared request state carelessly, and burying business logic in middleware chains are common sources of hard-to-debug behavior.",
+      },
+      {
+        q: "How do memory leaks show up in Node/Express apps?",
+        a: "They often come from retained listeners, unbounded caches, unresolved timers, or objects captured in long-lived closures. In production, this appears as gradual memory growth and unstable restarts.",
+      },
+      {
+        q: "What is backpressure handling in APIs?",
+        a: "Backpressure is how the system resists being overwhelmed by downstream speed mismatches. In Express systems, that means streaming carefully, rate limiting, queueing, and protecting dependencies from overload.",
       },
     ],
   },

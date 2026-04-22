@@ -5,6 +5,42 @@ export type PrepQuestion = {
   useCase: string;
 };
 
+export type NextJsInterviewQuestion = {
+  q: string;
+  a: string;
+  code?: string;
+};
+
+export type NextJsInterviewSection = {
+  section: string;
+  questions: NextJsInterviewQuestion[];
+};
+
+export type ReactInterviewQuestion = {
+  q: string;
+  a: string;
+  code?: string;
+};
+
+export type ReactInterviewSection = {
+  section: "Core Concepts" | "Advanced Concepts" | "Performance & Architecture";
+  questions: ReactInterviewQuestion[];
+};
+
+export type ReactNativeInterviewQuestion = {
+  q: string;
+  a: string;
+  code?: string;
+};
+
+export type ReactNativeInterviewSection = {
+  section:
+    | "Core Concepts"
+    | "Architecture & Internals"
+    | "Performance, Native Integration & Production Challenges";
+  questions: ReactNativeInterviewQuestion[];
+};
+
 export type PrepTopic = {
   id: "nextjs" | "react" | "react-native";
   label: string;
@@ -330,6 +366,552 @@ export const frontendPrepTopics: PrepTopic[] = [
           "The choice depends on product risk, team expertise, and user expectations. If the app requires deep OS-level behavior, advanced graphics, platform-first UX, or the absolute best performance under strict constraints, native development often wins. If the app is mostly business workflows, forms, dashboards, and moderate interactivity, React Native can reduce delivery cost significantly. Senior engineers frame this as a business and technical tradeoff, not a tribal preference.",
         useCase:
           "A consumer banking app with custom onboarding, transactions, and dashboards may work well in React Native, while a video editing tool with heavy native processing should likely be built natively.",
+      },
+    ],
+  },
+];
+
+export const nextJsInterviewSections: NextJsInterviewSection[] = [
+  {
+    section: "Core Concepts",
+    questions: [
+      {
+        q: "Why do we need Next.js?",
+        a: "Next.js gives React a production framework: routing, server rendering, static generation, metadata, optimization, and server-side capabilities out of the box.",
+      },
+      {
+        q: "What are the differences between CSR, SSR, SSG, and ISR?",
+        a: "CSR renders in the browser, SSR renders per request, SSG renders at build time, and ISR refreshes static output after deployment using revalidation.",
+      },
+      {
+        q: "What is hydration in Next.js? Why does hydration mismatch occur?",
+        a: "Hydration attaches React to server-rendered HTML. Mismatches happen when the server output differs from the first client render, commonly due to time, random values, or browser-only APIs.",
+      },
+    ],
+  },
+  {
+    section: "Rendering Strategies",
+    questions: [
+      {
+        q: "When should you use SSR vs SSG?",
+        a: "Use SSR for per-request or user-specific data. Use SSG for stable public content. Use ISR when you want static speed with periodic freshness.",
+      },
+      {
+        q: "What are React Server Components (RSC)?",
+        a: "Server Components render only on the server, reduce client bundle size, and can access server-side resources directly without shipping that logic to the browser.",
+      },
+      {
+        q: "Difference between Server and Client Components?",
+        a: "Server Components are default in App Router and cannot use state/effects. Client Components use `use client`, run in the browser, and handle interactivity.",
+      },
+    ],
+  },
+  {
+    section: "Data Fetching",
+    questions: [
+      {
+        q: "How do you fetch data in Server Components?",
+        a: "Make the component async and call `fetch()` directly on the server, using cache options intentionally.",
+        code: `async function Page() {
+  const res = await fetch("https://api.example.com/data", {
+    cache: "no-store",
+  });
+
+  return <div>...</div>;
+}`,
+      },
+      {
+        q: "What is caching in fetch() in Next.js?",
+        a: "`force-cache` keeps cached data for static-style rendering, `no-store` always fetches fresh data, and `revalidate` enables time-based cache refresh.",
+      },
+      {
+        q: "What is revalidation?",
+        a: "Revalidation refreshes cached data after a time interval or on demand with APIs like `revalidatePath()` or `revalidateTag()`.",
+      },
+    ],
+  },
+  {
+    section: "Routing (App Router)",
+    questions: [
+      {
+        q: "Explain App Router structure",
+        a: "The `app/` directory defines routes. `page.tsx` is the route entry, `layout.tsx` wraps shared UI, `loading.tsx` handles suspense fallbacks, and `error.tsx` acts as an error boundary.",
+      },
+      {
+        q: "What are layouts vs templates?",
+        a: "Layouts persist across navigation and preserve state. Templates rerender on navigation and are useful when you want a fresh subtree each time.",
+      },
+      {
+        q: "What is Parallel Routing?",
+        a: "Parallel routes let you render multiple route slots at once, such as `@modal` and `@dashboard`, inside the same screen layout.",
+      },
+      {
+        q: "What is Intercepting Routes?",
+        a: "Intercepting routes let you render a route inside the current UI context, commonly for modal-over-page patterns without full navigation replacement.",
+      },
+    ],
+  },
+  {
+    section: "Middleware & Edge",
+    questions: [
+      {
+        q: "What is middleware in Next.js?",
+        a: "Middleware runs before the request completes and is typically used for auth checks, redirects, localization, or lightweight request shaping.",
+      },
+      {
+        q: "What is Edge Runtime?",
+        a: "Edge Runtime executes code closer to users for lower latency, but it has a smaller runtime surface and does not support the full Node.js API set.",
+      },
+    ],
+  },
+  {
+    section: "Performance Optimization",
+    questions: [
+      {
+        q: "How do you optimize Next.js performance?",
+        a: "Use Server Components where possible, keep client bundles small, optimize images, lazy load heavy UI, cache intentionally, and avoid unnecessary client-only rendering.",
+      },
+      {
+        q: "What is bundle splitting?",
+        a: "Bundle splitting loads only the JavaScript needed for a route or feature instead of shipping one large bundle for the whole app.",
+      },
+      {
+        q: "What is Streaming in Next.js?",
+        a: "Streaming sends HTML in chunks using Suspense so users see useful UI earlier instead of waiting for the entire page to finish rendering.",
+      },
+      {
+        q: "What is image optimization in Next.js?",
+        a: "`next/image` provides optimized image delivery with resizing, lazy loading, and better formats to improve loading performance.",
+      },
+    ],
+  },
+  {
+    section: "Server Components vs Client Components",
+    questions: [
+      {
+        q: "When should you prefer Server Components?",
+        a: "Prefer Server Components for data-heavy, non-interactive UI because they reduce client JavaScript and keep server concerns off the browser.",
+      },
+      {
+        q: "When should you use Client Components?",
+        a: "Use Client Components when you need state, effects, browser APIs, event handlers, or real-time interactive behavior.",
+      },
+    ],
+  },
+  {
+    section: "Caching & Revalidation",
+    questions: [
+      {
+        q: "What caching layers exist in Next.js?",
+        a: "Common layers include request-level fetch caching, the data cache, full route cache, and CDN/edge cache depending on deployment.",
+      },
+      {
+        q: "What is Incremental Static Regeneration (ISR)?",
+        a: "ISR lets a static page stay fast while being regenerated after build time using a revalidation interval or manual invalidation.",
+      },
+    ],
+  },
+  {
+    section: "Server Actions",
+    questions: [
+      {
+        q: "What are Server Actions?",
+        a: "Server Actions are server-executed functions that can be called from forms or components without creating a separate API route.",
+        code: `"use server";
+
+export async function createUser(formData: FormData) {
+  // server logic
+}`,
+      },
+      {
+        q: "Why use Server Actions over API routes?",
+        a: "They reduce boilerplate, keep mutations close to the component tree, and simplify common form-driven server workflows.",
+      },
+    ],
+  },
+  {
+    section: "SEO & Metadata",
+    questions: [
+      {
+        q: "What are metadata in Next.js?",
+        a: "Metadata defines SEO and social preview information such as title, description, and Open Graph fields using the Metadata API.",
+        code: `export const metadata = {
+  title: "Home",
+  description: "Next.js app",
+};`,
+      },
+      {
+        q: "How does Next.js improve SEO?",
+        a: "It improves SEO through server-rendered HTML, static generation, metadata support, clean routing, and strong default performance characteristics.",
+      },
+    ],
+  },
+  {
+    section: "Deployment & Production",
+    questions: [
+      {
+        q: "How does Next.js handle security?",
+        a: "It helps by keeping server logic on the server, supporting middleware-based guards, and protecting secrets through server-only environment usage.",
+      },
+      {
+        q: "What are route handlers?",
+        a: "Route handlers are backend endpoints defined in `app/**/route.ts` and are used for server-side HTTP handling in App Router.",
+      },
+      {
+        q: "What should you validate before production deployment?",
+        a: "Check caching behavior, runtime boundaries, image and asset optimization, error handling, observability, environment variables, and rollout strategy.",
+      },
+    ],
+  },
+];
+
+export const reactInterviewSections: ReactInterviewSection[] = [
+  {
+    section: "Core Concepts",
+    questions: [
+      {
+        q: "What is React and why does it exist?",
+        a: "React exists to build complex UIs from composable components with predictable state-driven rendering. Its real value is managing UI change over time, not just templating HTML.",
+      },
+      {
+        q: "What is virtual DOM?",
+        a: "Virtual DOM is React’s in-memory UI representation used to calculate the minimal real DOM updates. It is a mechanism, not the performance story by itself.",
+      },
+      {
+        q: "What is reconciliation?",
+        a: "Reconciliation is React comparing previous and next element trees to decide what to preserve, update, mount, or unmount. Keys and component identity directly affect this behavior.",
+      },
+      {
+        q: "What is JSX and how does it work?",
+        a: "JSX is syntax that compiles to React element creation calls. It is not HTML; it is a declarative way to describe UI trees inside JavaScript or TypeScript.",
+      },
+      {
+        q: "Functional vs Class components",
+        a: "Function components are the modern default because hooks make stateful logic reusable and composable. Class components still matter mainly for older codebases and error boundary support.",
+      },
+      {
+        q: "Props vs State",
+        a: "Props are external inputs passed into a component. State is internal mutable data owned by a component or hook. Props drive composition; state drives local behavior.",
+      },
+      {
+        q: "Controlled vs uncontrolled components",
+        a: "Controlled inputs are driven by React state and suit dynamic validation or live UI updates. Uncontrolled inputs keep DOM-owned state and are simpler when values are only needed at submit time.",
+      },
+      {
+        q: "Lifting state up",
+        a: "Lift state to the nearest common owner when multiple components need the same source of truth. The tradeoff is broader re-render scope and possible prop drilling.",
+      },
+      {
+        q: "Component lifecycle in the hooks world",
+        a: "In function components, think in terms of render, commit, and effect synchronization rather than class lifecycle names. `useEffect` handles post-commit sync, not arbitrary lifecycle emulation.",
+      },
+      {
+        q: "How do useState, useEffect, useMemo, and useCallback differ?",
+        a: "`useState` stores local state, `useEffect` syncs with external systems, `useMemo` caches computed values, and `useCallback` caches function identity. Only use memoization when it changes real render cost.",
+      },
+      {
+        q: "Why does the useEffect dependency array matter?",
+        a: "Dependencies define which values an effect closes over and when it must resynchronize. Wrong dependencies cause stale behavior, missed updates, or unnecessary reruns.",
+      },
+      {
+        q: "What are common mistakes in useEffect?",
+        a: "Using effects for derived state, missing dependencies, causing render loops, and placing event logic in effects instead of handlers are the most common senior-level code review issues.",
+      },
+      {
+        q: "What are good custom hook design patterns?",
+        a: "Custom hooks should encapsulate a single behavior boundary, expose a stable interface, and hide implementation details. Good hooks improve reuse without leaking lifecycle complexity.",
+      },
+    ],
+  },
+  {
+    section: "Advanced Concepts",
+    questions: [
+      {
+        q: "What is React Fiber architecture?",
+        a: "Fiber is React’s internal scheduling and rendering architecture that breaks work into units so rendering can be paused, resumed, prioritized, or discarded when needed.",
+      },
+      {
+        q: "Explain React Fiber reconciliation at a deeper level",
+        a: "Fiber turns each element into a work unit with links to parent, child, and sibling nodes. That lets React incrementally reconcile trees and prioritize urgent UI like input updates over less important rendering work.",
+      },
+      {
+        q: "What is concurrent rendering in React 18?",
+        a: "Concurrent rendering allows React to prepare and prioritize updates more flexibly instead of blocking the main thread for every render path. It is about scheduling, not parallel threads.",
+      },
+      {
+        q: "What is automatic batching?",
+        a: "React 18 batches more state updates automatically, including async contexts, so multiple updates can produce one render instead of several. This improves consistency and reduces wasted work.",
+      },
+      {
+        q: "How does React batching behave in async updates?",
+        a: "In React 18, updates inside promises, timeouts, and native async flows are usually batched too. You only force sync flushing when UI correctness truly depends on immediate DOM commitment.",
+      },
+      {
+        q: "What is Suspense and when is it useful?",
+        a: "Suspense lets React show fallback UI while waiting for lazy code or async resources. It is useful when loading boundaries are designed intentionally instead of scattering spinners everywhere.",
+      },
+      {
+        q: "What is lazy loading in React?",
+        a: "Lazy loading defers code until a route or component is needed, usually through `React.lazy` or framework-level dynamic imports. It reduces initial bundle cost.",
+      },
+      {
+        q: "What are error boundaries?",
+        a: "Error boundaries catch render-time errors in a subtree and show fallback UI instead of crashing the whole screen. They do not catch every async or event handler error case.",
+      },
+      {
+        q: "What are portals?",
+        a: "Portals render UI into another DOM subtree while preserving React ownership. They are useful for modals, overlays, and layered UI that should escape parent stacking constraints.",
+      },
+      {
+        q: "How do refs and forwardRef work?",
+        a: "Refs hold mutable values or DOM handles without triggering renders. `forwardRef` lets component libraries expose an internal DOM node or imperative surface intentionally.",
+      },
+      {
+        q: "Higher Order Components vs Hooks pattern",
+        a: "Hooks usually replace HOCs for logic reuse because they compose more cleanly and avoid wrapper nesting. HOCs still appear in older ecosystems and cross-cutting integration layers.",
+      },
+      {
+        q: "Render props pattern vs hooks",
+        a: "Render props were a pre-hooks composition pattern for sharing behavior. Hooks are generally simpler and flatter, but render props can still help when behavior must stay explicitly scoped in JSX.",
+      },
+      {
+        q: "What is the stale closure problem in hooks?",
+        a: "A stale closure happens when a callback or effect captures an old value because dependencies were omitted or logic was scheduled later. It is one of the most common subtle React bugs.",
+      },
+      {
+        q: "What are dependency array pitfalls?",
+        a: "The main pitfalls are suppressing needed dependencies, depending on unstable objects/functions unintentionally, and misunderstanding that effects synchronize values from the render they were created in.",
+      },
+      {
+        q: "Why does StrictMode double render in development?",
+        a: "StrictMode intentionally re-invokes render and certain lifecycle-like behaviors in development to expose unsafe side effects and cleanup bugs before production.",
+      },
+    ],
+  },
+  {
+    section: "Performance & Architecture",
+    questions: [
+      {
+        q: "Why does React re-render?",
+        a: "A component re-renders when its state changes, its parent re-renders, its consumed context changes, or its owning framework triggers a new render pass.",
+      },
+      {
+        q: "How do you prevent unnecessary re-renders?",
+        a: "Keep state local, split components by responsibility, stabilize expensive prop paths when needed, and memoize only after profiling shows real waste.",
+      },
+      {
+        q: "memo vs useMemo vs useCallback differences",
+        a: "`memo` skips component re-renders when props are stable, `useMemo` caches computed values, and `useCallback` caches function identity. They solve related but different problems.",
+      },
+      {
+        q: "When should you NOT use useMemo or useCallback?",
+        a: "Do not use them by default. If computation is cheap or prop identity is not causing real work, memoization adds noise and can make code harder to reason about.",
+      },
+      {
+        q: "What are practical React rendering optimization strategies?",
+        a: "Move state closer to where it is used, avoid mirrored state, virtualize large lists, lazy load heavy code, and isolate expensive subtrees with memoization only where proven useful.",
+      },
+      {
+        q: "Why is the key prop important in lists?",
+        a: "Keys define element identity during reconciliation. Unstable keys cause remounts, lost state, broken animations, and incorrect diff behavior during reordering.",
+      },
+      {
+        q: "How do you optimize large lists?",
+        a: "Use virtualization so only visible rows render, keep row components lightweight, and avoid global state changes that cause the whole list to rerender.",
+      },
+      {
+        q: "State management tradeoffs: Context vs Redux vs Zustand",
+        a: "Context is good for low-frequency shared state, Redux suits large event-driven systems with tooling and discipline, and Zustand works well for lightweight store ergonomics without Redux-level ceremony.",
+      },
+      {
+        q: "What are scalability issues in Context API?",
+        a: "Large or frequently changing context values can rerender too many consumers. Context solves propagation, not large-scale state architecture or performance isolation by itself.",
+      },
+      {
+        q: "What causes React hydration issues in SSR apps?",
+        a: "Hydration issues happen when server HTML and client render diverge, usually from nondeterministic values, browser-only logic, or state that changes before hydration completes.",
+      },
+      {
+        q: "How do memory leaks happen in React apps and how do you avoid them?",
+        a: "Leaks usually come from uncleaned subscriptions, timers, async work, and retained references. Cleanup effects, cancel ongoing work, and avoid storing long-lived references carelessly.",
+      },
+      {
+        q: "What architecture patterns matter in large React apps?",
+        a: "Clear domain boundaries, feature-based modules, shared primitives, predictable state ownership, and framework-aware server/client boundaries matter more than any single hook trick.",
+      },
+    ],
+  },
+];
+
+export const reactNativeInterviewSections: ReactNativeInterviewSection[] = [
+  {
+    section: "Core Concepts",
+    questions: [
+      {
+        q: "What is React Native and why does it exist?",
+        a: "React Native exists to build mobile apps with React’s component model while rendering native platform views instead of the browser DOM, improving code reuse without fully sacrificing native UX.",
+      },
+      {
+        q: "Difference between React Web and React Native",
+        a: "React Web targets the DOM and browser APIs, while React Native targets iOS and Android host views with platform-specific rendering, input, layout, and runtime constraints.",
+      },
+      {
+        q: "What are core components like View, Text, ScrollView, and FlatList?",
+        a: "`View` is the base layout container, `Text` renders text, `ScrollView` renders all children eagerly, and `FlatList` virtualizes large lists for performance and memory control.",
+      },
+      {
+        q: "How does styling work in React Native, and how is Flexbox different from CSS on web?",
+        a: "React Native uses JS style objects and a Flexbox-based layout engine, but not full CSS. Defaults and supported properties differ, and layout must be designed with mobile constraints in mind.",
+      },
+      {
+        q: "How do props, state, and rendering work in React Native?",
+        a: "The rendering model is still React: props flow down, state triggers re-renders, and reconciliation decides what changes. The difference is that updates eventually map to native UI primitives instead of DOM nodes.",
+      },
+      {
+        q: "Controlled vs uncontrolled inputs in React Native",
+        a: "Controlled inputs give better synchronization for validation and UI state, but can become expensive in heavy forms if everything rerenders on each keystroke. Uncontrolled patterns can help in narrow cases but are less common than on web.",
+      },
+      {
+        q: "What are navigation basics in React Native?",
+        a: "Stack navigation models drill-in flows, tab navigation handles primary app areas, and drawers expose global sections. Good mobile navigation design follows product flow and platform expectations, not just library defaults.",
+      },
+    ],
+  },
+  {
+    section: "Architecture & Internals",
+    questions: [
+      {
+        q: "What is the React Native Bridge?",
+        a: "The Bridge is the older async communication layer between JavaScript and native modules/UI. It enabled cross-runtime communication but introduced serialization and latency overhead.",
+      },
+      {
+        q: "What is JSI (JavaScript Interface)?",
+        a: "JSI is a lower-level interface that allows JavaScript and native code to interact more directly without relying on the older batched Bridge model for every operation.",
+      },
+      {
+        q: "Why is React Native moving away from Bridge architecture?",
+        a: "The Bridge adds overhead, especially for chatty UI and native interactions. Newer architecture reduces indirection, lowers latency, and improves performance for complex apps.",
+      },
+      {
+        q: "What is Fabric architecture?",
+        a: "Fabric is the new React Native rendering system that aligns more closely with modern React, improves scheduling, and updates native UI with a more efficient architecture.",
+      },
+      {
+        q: "What are TurboModules?",
+        a: "TurboModules are the newer native module system designed for faster, more direct access and better lazy loading compared with older bridge-based modules.",
+      },
+      {
+        q: "How do JS thread and native thread communicate?",
+        a: "React logic runs on the JS side, while native UI and platform work happen on native threads. Communication depends on the architecture path, but thread boundaries still matter for responsiveness.",
+      },
+      {
+        q: "What is the rendering pipeline in React Native?",
+        a: "React computes the UI tree, reconciliation determines changes, and the host renderer maps those changes into native views. Performance issues often appear at the boundaries between JS scheduling and native rendering.",
+      },
+      {
+        q: "What is reconciliation in the mobile context?",
+        a: "Reconciliation still means comparing previous and next trees, but the cost profile is mobile-specific because updates affect native view trees, layout passes, gestures, and lower-powered devices.",
+      },
+      {
+        q: "What is Hermes and why does it improve performance?",
+        a: "Hermes is a JavaScript engine optimized for React Native. It improves startup, memory usage, and runtime behavior by reducing JS overhead for mobile-oriented workloads.",
+      },
+      {
+        q: "Bridge vs JSI vs Fabric differences",
+        a: "Bridge is the older async message-based layer, JSI is the lower-level interop model, and Fabric is the modern rendering architecture built to work better with React’s newer scheduling model.",
+      },
+      {
+        q: "Why is React Native not fully native?",
+        a: "Because application logic still runs through a cross-platform React abstraction and runtime layer. It renders native views, but it is not the same as writing platform code end-to-end in Swift/Kotlin.",
+      },
+      {
+        q: "What is the multi-threading model in React Native?",
+        a: "React Native involves multiple execution contexts such as the JS runtime, UI/main thread, and native/background work. Senior engineers reason about thread boundaries when diagnosing jank or blocked interaction.",
+      },
+    ],
+  },
+  {
+    section: "Performance, Native Integration & Production Challenges",
+    questions: [
+      {
+        q: "Why is FlatList preferred over ScrollView for large lists?",
+        a: "FlatList virtualizes rows and only keeps a window of items mounted, while ScrollView renders everything eagerly and becomes expensive in memory and frame time.",
+      },
+      {
+        q: "What is virtualization in React Native?",
+        a: "Virtualization means rendering only the items near the viewport and recycling or unmounting off-screen content to keep list performance stable on mobile devices.",
+      },
+      {
+        q: "How do memory leaks happen in React Native apps?",
+        a: "They usually come from uncleaned listeners, timers, retained navigation state, oversized caches, or native resources that are never released. Mobile leaks often show up as long-session degradation rather than immediate crashes.",
+      },
+      {
+        q: "What are practical image optimization strategies in React Native?",
+        a: "Use correctly sized assets, caching-aware image components, lazy loading, compression, CDN delivery, and avoid decoding oversized images on low-memory devices.",
+      },
+      {
+        q: "What causes re-render issues in React Native and how do you avoid them?",
+        a: "Broad state ownership, unstable props, and expensive list rows are common causes. Keep state local, isolate heavy subtrees, and optimize only after profiling on real devices.",
+      },
+      {
+        q: "How are useMemo and useCallback misused in mobile apps?",
+        a: "They are often added everywhere without measurement. On mobile, extra complexity can hurt maintainability without solving the real bottleneck, which is often list architecture or bridge/native work instead of function identity.",
+      },
+      {
+        q: "What are common navigation performance issues?",
+        a: "Heavy screens mounting at once, oversized shared context, expensive transition work, and poor screen lifecycle cleanup can make navigation feel slow or janky.",
+      },
+      {
+        q: "JS thread vs native driver for animations",
+        a: "Animations on the JS thread can stutter when JS is busy. Native-driven or UI-thread-driven animations are more resilient because they do not depend on every frame crossing the JS boundary.",
+      },
+      {
+        q: "What is InteractionManager used for?",
+        a: "InteractionManager lets you defer expensive non-urgent work until ongoing interactions and animations are complete, which helps preserve responsiveness.",
+      },
+      {
+        q: "How do you debug performance bottlenecks in React Native?",
+        a: "Profile on real devices, inspect JS and UI thread behavior, measure list rendering, image cost, navigation transitions, and native module overhead instead of guessing from the simulator alone.",
+      },
+      {
+        q: "How do Native Modules work?",
+        a: "Native Modules expose platform-specific functionality to JavaScript so RN code can call device or OS capabilities not available in pure JavaScript.",
+      },
+      {
+        q: "When should you write native code in Android or iOS?",
+        a: "Write native code when performance, platform APIs, advanced SDKs, or UI behavior require capabilities React Native cannot deliver cleanly or efficiently on its own.",
+      },
+      {
+        q: "How do you link native dependencies?",
+        a: "Modern RN mostly relies on autolinking, but engineers still need to understand native project setup, build configuration, and platform-specific integration when libraries are not plug-and-play.",
+      },
+      {
+        q: "How should permissions be handled in React Native?",
+        a: "Permissions should be requested contextually, mapped to platform-specific behavior, and tied to clear UX flows. Treat camera, location, and storage access as product design and security concerns, not just API calls.",
+      },
+      {
+        q: "What is push notifications architecture in React Native apps?",
+        a: "Push notifications depend on native platform push services, backend token management, app lifecycle handling, and deep linking or state restoration when users open notifications.",
+      },
+      {
+        q: "How does deep linking work in React Native?",
+        a: "Deep linking maps external URLs or app intents into navigation state so the app can open a specific screen or flow directly from web links, push notifications, or other apps.",
+      },
+      {
+        q: "What are over-the-air updates and what is the CodePush concept?",
+        a: "OTA updates let JavaScript-side changes ship without full app store release cycles, but they must be governed carefully because native changes still require store-based binaries.",
+      },
+      {
+        q: "Expo vs Bare React Native tradeoffs",
+        a: "Expo improves developer speed and reduces native setup burden, while Bare gives maximum native control. The tradeoff is convenience versus platform flexibility and custom integration depth.",
+      },
+      {
+        q: "What is Gesture Handler architecture at a high level?",
+        a: "Gesture Handler moves gesture recognition closer to native handling so interactions are more reliable and performant than pure JS responder-based gesture logic.",
+      },
+      {
+        q: "Why does Reanimated run better for complex motion?",
+        a: "Reanimated can execute animation logic closer to the UI thread, reducing reliance on the JS thread and making gesture-driven interactions smoother under load.",
       },
     ],
   },
