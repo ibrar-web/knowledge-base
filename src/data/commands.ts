@@ -1,0 +1,68 @@
+import type { CommandLibraryItem } from "@/types/interview";
+
+export const commandLibrary: CommandLibraryItem[] = [
+  {
+    id: "git-status",
+    category: "Git commands",
+    command: "git status",
+    explanation: "Shows staged, unstaged, and untracked changes in the working tree.",
+    useCase: "Use before committing, rebasing, or switching branches.",
+    interviewRelevance: "Demonstrates disciplined local workflow and awareness of repo state.",
+  },
+  {
+    id: "git-rebase",
+    category: "Git commands",
+    command: "git rebase origin/main",
+    explanation: "Replays local commits on top of the latest main branch history.",
+    useCase: "Keeps a feature branch current before merging or opening a PR.",
+    interviewRelevance: "Useful when explaining clean history and conflict resolution.",
+  },
+  {
+    id: "docker-build",
+    category: "Docker commands",
+    command: "docker build -t app:latest .",
+    explanation: "Builds a Docker image from the current directory.",
+    useCase: "Create deployable or testable container artifacts.",
+    interviewRelevance: "Shows practical container packaging knowledge.",
+  },
+  {
+    id: "docker-logs",
+    category: "Docker commands",
+    command: "docker logs -f <container>",
+    explanation: "Streams runtime logs from a container.",
+    useCase: "Debug local container behavior or startup issues.",
+    interviewRelevance: "Useful when discussing incident response and debugging.",
+  },
+  {
+    id: "aws-s3-ls",
+    category: "AWS CLI",
+    command: "aws s3 ls",
+    explanation: "Lists available S3 buckets for the configured AWS account.",
+    useCase: "Quick sanity check for account access or storage inventory.",
+    interviewRelevance: "Shows baseline AWS CLI familiarity.",
+  },
+  {
+    id: "aws-ecs-update",
+    category: "AWS CLI",
+    command: "aws ecs update-service --cluster prod --service api --force-new-deployment",
+    explanation: "Forces ECS to roll a new deployment for an existing service.",
+    useCase: "Trigger a rollout after shipping a new image tag.",
+    interviewRelevance: "Good example for deployment pipeline discussions.",
+  },
+  {
+    id: "gcp-run-deploy",
+    category: "GCP CLI",
+    command: "gcloud run deploy web --source . --region us-central1",
+    explanation: "Builds and deploys a source-based service to Cloud Run.",
+    useCase: "Ship a containerized web service without managing a cluster.",
+    interviewRelevance: "Illustrates platform-level deployment tradeoffs.",
+  },
+  {
+    id: "gcp-pubsub-subscribe",
+    category: "GCP CLI",
+    command: "gcloud pubsub subscriptions pull events-sub --limit=10 --auto-ack",
+    explanation: "Pulls messages from a Pub/Sub subscription and acknowledges them.",
+    useCase: "Inspect queue behavior during debugging.",
+    interviewRelevance: "Useful for event-driven system discussions.",
+  },
+];
