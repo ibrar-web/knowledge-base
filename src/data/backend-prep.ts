@@ -19,6 +19,20 @@ export type ExpressInterviewSection = {
   questions: ExpressInterviewQuestion[];
 };
 
+export type NestInterviewQuestion = {
+  q: string;
+  a: string;
+  code?: string;
+};
+
+export type NestInterviewSection = {
+  section:
+    | "Core Concepts"
+    | "Architecture & Internals"
+    | "Advanced Backend Systems & Production Design";
+  questions: NestInterviewQuestion[];
+};
+
 export type BackendPrepTopic = {
   id: "nodejs" | "express" | "nestjs" | "fastapi";
   label: string;
@@ -685,6 +699,240 @@ export const expressInterviewSections: ExpressInterviewSection[] = [
       {
         q: "What is backpressure handling in APIs?",
         a: "Backpressure is how the system resists being overwhelmed by downstream speed mismatches. In Express systems, that means streaming carefully, rate limiting, queueing, and protecting dependencies from overload.",
+      },
+    ],
+  },
+];
+
+export const nestInterviewSections: NestInterviewSection[] = [
+  {
+    section: "Core Concepts",
+    questions: [
+      {
+        q: "What is NestJS and why is it used?",
+        a: "NestJS is an opinionated Node.js framework built for scalable backend systems. It is used when teams want consistent architecture, dependency injection, modularity, and strong testability across large codebases.",
+      },
+      {
+        q: "How is NestJS different from Express?",
+        a: "Express is minimal and leaves architecture to the team. NestJS sits on top of Express or Fastify and adds a structured application model with modules, DI, guards, pipes, interceptors, and decorators.",
+      },
+      {
+        q: "What is modular architecture in NestJS?",
+        a: "NestJS organizes features into modules that define boundaries for providers, controllers, and exports. This helps large systems maintain ownership, reuse, and dependency clarity.",
+      },
+      {
+        q: "What are Controllers, Services, and Modules?",
+        a: "Controllers handle transport-level requests, services contain application or domain logic, and modules wire related providers and controllers into a coherent feature boundary.",
+      },
+      {
+        q: "How does Dependency Injection work in NestJS?",
+        a: "Nest resolves class dependencies through a container that instantiates providers based on metadata and module registration. This keeps construction and consumption decoupled.",
+      },
+      {
+        q: "What are Providers and how does the DI container use them?",
+        a: "Providers are injectable units such as services, repositories, adapters, and factories. The DI container registers them by token and resolves them where requested.",
+      },
+      {
+        q: "What are decorators in NestJS?",
+        a: "Decorators attach metadata that Nest uses to define controllers, routes, providers, guards, pipes, and module structure. They are part of the framework contract, not just syntax sugar.",
+      },
+      {
+        q: "Why is NestJS attractive for enterprise teams?",
+        a: "Because it reduces architectural drift. Teams get common patterns for validation, security, dependency wiring, transport abstraction, and testing instead of inventing each one separately.",
+      },
+    ],
+  },
+  {
+    section: "Architecture & Internals",
+    questions: [
+      {
+        q: "How does NestJS bootstrap an application?",
+        a: "Nest starts by creating an application context, scanning modules and metadata, building the DI graph, instantiating providers, and then binding the chosen HTTP adapter and route handlers.",
+      },
+      {
+        q: "How does the Dependency Injection container work internally?",
+        a: "Nest builds a provider graph from module metadata, resolves dependencies by token, handles scope rules, and caches singleton instances unless request or transient scope is explicitly used.",
+      },
+      {
+        q: "What is the request lifecycle in NestJS?",
+        a: "A request typically passes through middleware, guards, interceptors, pipes, controller handlers, service logic, then response interception or exception filters before returning to the client.",
+      },
+      {
+        q: "What is the difference between Middleware, Guards, Interceptors, and Pipes?",
+        a: "Middleware handles broad request preprocessing, guards decide access, pipes validate or transform input, and interceptors wrap execution for cross-cutting behavior such as logging or response shaping.",
+      },
+      {
+        q: "What is the execution order of the NestJS request pipeline?",
+        a: "Middleware runs first, then guards, then interceptors before controller execution, then pipes for handler arguments, then the handler, then interceptors on the way out, with exception filters handling thrown errors.",
+      },
+      {
+        q: "How are modules resolved and loaded?",
+        a: "Nest recursively loads imported modules, registers their providers and controllers, then exposes only exported providers across module boundaries. This keeps internal implementation hidden unless deliberately shared.",
+      },
+      {
+        q: "What are dynamic modules?",
+        a: "Dynamic modules let you configure module registration at runtime, often to inject environment-specific providers, options objects, or external service clients.",
+      },
+      {
+        q: "How does NestJS integrate with Express and Fastify?",
+        a: "Nest abstracts the HTTP platform through adapters. That means application structure stays mostly the same while the underlying request engine can be Express or Fastify depending on performance and ecosystem needs.",
+      },
+      {
+        q: "What is the reflection metadata system in NestJS?",
+        a: "Nest uses TypeScript decorator metadata and reflection to understand routes, parameter bindings, providers, guards, and custom framework behavior at runtime.",
+      },
+      {
+        q: "What tradeoffs come with request-scoped providers?",
+        a: "They are useful for per-request context but cost more than singletons because instances are created for each request path. Overusing them can add avoidable overhead under load.",
+      },
+      {
+        q: "How should authentication flow be designed with Guards?",
+        a: "Authentication guards should validate identity early and attach trusted user context. Authorization should remain a separate layer for resource-level decisions, not be buried inside one generic guard.",
+      },
+      {
+        q: "How should RBAC be implemented in NestJS?",
+        a: "RBAC is usually implemented with metadata-driven guards that evaluate roles or permissions against a trusted user context. The design should support policy evolution, not hardcode checks across controllers.",
+      },
+      {
+        q: "What is the difference between transformation and validation in Pipes?",
+        a: "Validation ensures input matches contract expectations; transformation converts raw transport data into the shape the application actually wants to consume.",
+      },
+      {
+        q: "Why use Interceptors for logging, caching, or transformation?",
+        a: "Interceptors are ideal for cross-cutting execution wrappers because they can observe timing, alter responses, apply caching, or attach telemetry without contaminating handlers.",
+      },
+    ],
+  },
+  {
+    section: "Advanced Backend Systems & Production Design",
+    questions: [
+      {
+        q: "What is NestJS Microservices architecture?",
+        a: "NestJS microservices let you use the same application patterns across event-driven and RPC-style services by abstracting transport details behind a consistent programming model.",
+      },
+      {
+        q: "How should you think about transport layers like TCP, Redis, NATS, RabbitMQ, and Kafka?",
+        a: "Choose transports based on delivery semantics, topology, throughput, ordering, and operational maturity. The transport is an infrastructure choice, not the architecture by itself.",
+      },
+      {
+        q: "Request-response vs event-driven communication tradeoffs",
+        a: "Request-response is simpler and immediate but tightly coupled. Event-driven communication improves decoupling and resilience, but introduces eventual consistency, retries, and consumer coordination complexity.",
+      },
+      {
+        q: "What are message patterns in NestJS microservices?",
+        a: "Message patterns define how services consume commands, queries, or events across transports. The real design question is whether you are modeling synchronous workflows or asynchronous domain propagation.",
+      },
+      {
+        q: "TypeORM vs Prisma vs Mongoose tradeoffs",
+        a: "TypeORM is decorator-heavy and ORM-oriented, Prisma emphasizes type-safe query ergonomics, and Mongoose fits document-centric MongoDB modeling. The tradeoff is control, abstraction style, and team familiarity.",
+      },
+      {
+        q: "What is the Repository pattern in NestJS?",
+        a: "The repository pattern isolates persistence concerns behind domain-oriented interfaces. It is useful when you want transport and service layers to stay independent from query implementation details.",
+      },
+      {
+        q: "How should transaction handling work in NestJS applications?",
+        a: "Transactions belong in the application or domain service layer around a business operation, not scattered across controllers. The system must define clear consistency boundaries.",
+      },
+      {
+        q: "Why does connection pooling matter?",
+        a: "Pooling avoids the overhead of creating database connections per request and protects backend services from collapsing under concurrency spikes.",
+      },
+      {
+        q: "What is CQRS and when does it make sense in NestJS?",
+        a: "CQRS separates write and read responsibilities when the domain or scaling model benefits from different models, flows, or optimization paths. It is useful, but unnecessary for simple CRUD services.",
+      },
+      {
+        q: "How does NestJS handle scalability?",
+        a: "NestJS scales well when the application is stateless at the edge, modules are well-bounded, long-running work is asynchronous, and infrastructure concerns such as caching and queues are designed deliberately.",
+      },
+      {
+        q: "In-memory cache vs Redis cache tradeoffs",
+        a: "In-memory cache is fast and simple but isolated per instance. Redis works across replicas and supports broader system patterns, but adds network hops and operational dependency.",
+      },
+      {
+        q: "How should request throttling and rate limiting be applied?",
+        a: "Use throttling per endpoint risk profile and distribute counters if the system is horizontally scaled. Rate limiting is part of abuse prevention and dependency protection, not just auth security.",
+      },
+      {
+        q: "Cluster mode vs PM2 usage",
+        a: "Cluster mode uses multiple Node processes to use CPU cores. PM2 adds orchestration features like process supervision and restarts, but container platforms often replace part of that operational role.",
+      },
+      {
+        q: "How do you avoid blocking operations in NestJS?",
+        a: "Keep request paths I/O-oriented, push heavy jobs to workers or async pipelines, and avoid CPU-heavy synchronous logic inside controller or service execution.",
+      },
+      {
+        q: "How should authentication strategies be chosen in NestJS?",
+        a: "Use JWT, sessions, or OAuth2 based on client type, revocation needs, identity provider model, and operational constraints. The right answer depends on the trust and lifecycle model.",
+      },
+      {
+        q: "What role does Passport.js play in NestJS?",
+        a: "Passport integrates strategy-based authentication into Nest guards and request flow. It is convenient, but teams should still understand the security model rather than treat Passport as magic.",
+      },
+      {
+        q: "Why are input validation and sanitization critical in NestJS?",
+        a: "Validation protects contracts and prevents malformed requests from entering business logic. Sanitization reduces injection and unsafe payload risks, especially when inputs propagate across services.",
+      },
+      {
+        q: "How should CORS and Helmet be handled in NestJS?",
+        a: "CORS should be explicitly scoped to real client origins, and Helmet should be part of layered HTTP hardening. Neither replaces proper auth, validation, or deployment-level controls.",
+      },
+      {
+        q: "What does good logging architecture look like in NestJS?",
+        a: "Use structured logs with correlation IDs, environment-aware log levels, and centralized transport integration such as Pino or Winston. Logging should support diagnosis, not just print events.",
+      },
+      {
+        q: "Why use global exception filters?",
+        a: "Global filters standardize how internal failures become external responses and telemetry. They keep error mapping consistent across controllers and transports.",
+      },
+      {
+        q: "How should health checks and monitoring endpoints be designed?",
+        a: "Readiness and liveness checks should reflect actual service health, not just process availability. Monitoring should combine metrics, logs, traces, and dependency health signals.",
+      },
+      {
+        q: "How should graceful shutdown work in NestJS?",
+        a: "The app should stop accepting new work, drain in-flight requests, close adapters and external connections, and exit predictably so deployments do not cause partial failures.",
+      },
+      {
+        q: "What are configuration management best practices in NestJS?",
+        a: "Use ConfigModule or equivalent centralized config, validate environment values at startup, separate secrets from code, and fail fast when required configuration is invalid.",
+      },
+      {
+        q: "How should API versioning be handled?",
+        a: "Prefer backward-compatible evolution where possible, then use explicit versioning when contracts must diverge. Versioning should reflect product stability, not framework convenience alone.",
+      },
+      {
+        q: "How should multi-environment deployment be designed?",
+        a: "Keep artifacts immutable across environments, vary only config and infrastructure bindings, and standardize health, observability, and rollout policies across stages.",
+      },
+      {
+        q: "How does the Saga pattern fit in NestJS systems?",
+        a: "Sagas coordinate long-running distributed workflows where local transactions succeed independently and compensation handles failure across service boundaries.",
+      },
+      {
+        q: "What is the Outbox pattern and why does it matter?",
+        a: "The Outbox pattern ensures domain state changes and emitted events stay consistent by persisting outbound messages transactionally before asynchronous publishing.",
+      },
+      {
+        q: "How does EventEmitter or Kafka fit into event-driven NestJS design?",
+        a: "EventEmitter is useful inside one service boundary; Kafka and similar brokers are for durable cross-service event propagation. They solve different levels of system coupling.",
+      },
+      {
+        q: "What role can GraphQL play in a NestJS system?",
+        a: "GraphQL can be a strong API layer for client-driven aggregation, but it increases schema design complexity, resolver performance concerns, and authorization surface area.",
+      },
+      {
+        q: "How are WebSockets used in NestJS real-time systems?",
+        a: "Nest can host websocket gateways for real-time communication, but scaling them requires attention to sticky sessions, pub-sub fanout, and connection lifecycle management.",
+      },
+      {
+        q: "What are the tradeoffs in file upload handling?",
+        a: "Streaming uploads are more production-safe for large payloads and lower memory use. Buffering in memory is simpler but dangerous under concurrency and large files.",
+      },
+      {
+        q: "What is the API gateway role in a NestJS microservices ecosystem?",
+        a: "The API gateway acts as the edge boundary for routing, auth, aggregation, and client-facing concerns while internal services stay focused on domain capabilities.",
       },
     ],
   },
