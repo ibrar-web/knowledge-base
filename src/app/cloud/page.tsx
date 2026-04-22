@@ -1,5 +1,5 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { CloudDevopsPrepWorkspace } from "@/components/cloud-devops-prep-workspace";
 
 export default function CloudPage() {
-  return <PlaceholderPage title="Cloud" />;
+  return <CloudDevopsPrepWorkspace />;
 }
