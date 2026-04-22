@@ -62,6 +62,12 @@ export type CloudDevopsTopic = {
   commands: string[];
   concepts: string[];
   questions: CloudDevopsQuestion[];
+  references?: Array<{
+    title: string;
+    description: string;
+    language: string;
+    code: string;
+  }>;
 };
 
 export const cloudDevopsPrepTopics: CloudDevopsTopic[] = [
@@ -184,7 +190,11 @@ export const cloudDevopsPrepTopics: CloudDevopsTopic[] = [
     commands: [
       "gcloud auth login",
       "gcloud config set project my-project",
-      "gcloud run deploy",
+      "gcloud compute instances create my-vm --zone=us-central1-a --machine-type=e2-medium --tags=http-server,https-server",
+      "gcloud compute ssh my-vm --zone=us-central1-a",
+      "gcloud run deploy my-service --source . --region us-central1 --allow-unauthenticated",
+      "gcloud run services update my-service --region us-central1 --min-instances=1 --max-instances=10",
+      "gcloud run services describe my-service --region us-central1",
       "gcloud pubsub topics list",
       "gcloud compute instances list",
     ],
@@ -194,6 +204,63 @@ export const cloudDevopsPrepTopics: CloudDevopsTopic[] = [
       "Compute Engine",
       "Serverless model",
       "GCP networking",
+    ],
+    references: [
+      {
+        title: "Cloud Run Dockerfile",
+        description:
+          "A production-oriented Dockerfile for deploying a FastAPI app to Cloud Run.",
+        language: "dockerfile",
+        code: `FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \\
+    pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8080
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]`,
+      },
+      {
+        title: "Cloud Run Local/Deploy Script",
+        description:
+          "Use this `run.sh` locally to start the app, and manually trigger Cloud Run deployment with `bash run.sh deploy`.",
+        language: "bash",
+        code: `#!/bin/bash
+set -euo pipefail
+
+# GCP Cloud Run deployment — commented out
+# Triggered manually by running: bash run.sh deploy
+if [[ "\${1:-}" == "deploy" ]]; then
+  gcloud run deploy psvbot \\
+    --source . \\
+    --region us-central1 \\
+    --allow-unauthenticated \\
+    --memory 2Gi \\
+    --cpu 1 \\
+    --timeout 900
+  exit 0
+fi
+
+if [[ ! -x ".venv/bin/python" ]]; then
+  echo "Missing .venv. Create it first with: python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt" >&2
+  exit 1
+fi
+
+source .venv/bin/activate
+exec .venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port "\${PORT:-8001}" --reload
+
+# sudo systemctl daemon-reload
+# sudo systemctl restart psvbot
+# sudo journalctl -u psvbot -f`,
+      },
     ],
     questions: [
       {

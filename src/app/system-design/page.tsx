@@ -1,5 +1,5 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { SystemDesignPrepWorkspace } from "@/components/system-design-prep-workspace";
 
 export default function SystemDesignPage() {
-  return <PlaceholderPage title="System Design" />;
+  return <SystemDesignPrepWorkspace />;
 }

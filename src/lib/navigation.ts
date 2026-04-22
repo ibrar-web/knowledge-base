@@ -4,8 +4,8 @@ export const navigationItems = [
   { href: "/backend", label: "Backend" },
   { href: "/cloud", label: "Cloud" },
   { href: "/devops", label: "DevOps" },
+  { href: "/databases", label: "Databases" },
   { href: "/ai", label: "AI" },
-  { href: "/git", label: "Git" },
   { href: "/system-design", label: "System Design" },
   { href: "/commands", label: "Commands" },
 ] as const;

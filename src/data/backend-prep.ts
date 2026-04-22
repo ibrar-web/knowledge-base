@@ -5,6 +5,21 @@ export type BackendPrepQuestion = {
   useCase: string;
 };
 
+export type NodeInterviewQuestion = {
+  q: string;
+  a: string;
+  code?: string;
+};
+
+export type NodeInterviewSection = {
+  section:
+    | "Core Concepts"
+    | "Runtime Internals"
+    | "Performance, Scaling & Production Systems"
+    | "Advanced Architecture Patterns";
+  questions: NodeInterviewQuestion[];
+};
+
 export type ExpressInterviewQuestion = {
   q: string;
   a: string;
@@ -492,6 +507,359 @@ export const backendPrepTopics: BackendPrepTopic[] = [
           "Framework-level async support helps, but scaling still depends on architecture. Senior engineers ensure request handlers remain lightweight, background jobs are handled outside request threads, caching is applied strategically, and deployment settings such as worker model and connection limits match workload behavior. They also watch latency percentiles, queue depth, and dependency saturation rather than assuming app-level throughput is the only metric that matters.",
         useCase:
           "A FastAPI service can run behind a load balancer with multiple workers, store shared session or rate-limit data externally, and push report generation to async workers.",
+      },
+    ],
+  },
+];
+
+export const nodeInterviewSections: NodeInterviewSection[] = [
+  {
+    section: "Core Concepts",
+    questions: [
+      {
+        q: "What is Node.js?",
+        a: "Node.js is a server-side JavaScript runtime built on V8 and native bindings that exposes an event-driven, non-blocking I/O model. Its value is not that JavaScript runs on servers, but that it can handle I/O-heavy workloads efficiently with relatively simple concurrency semantics.",
+      },
+      {
+        q: "Why is Node.js considered fast?",
+        a: "Node is fast for the right workloads because V8 executes JavaScript efficiently and the runtime avoids blocking per-request threads for most I/O. The tradeoff is that CPU-heavy work can still stall the single main event loop badly.",
+      },
+      {
+        q: "Node.js vs browser JavaScript runtime",
+        a: "Both execute JavaScript, but the host environment is different. Browsers provide DOM and UI APIs, while Node provides filesystem, network, process, and OS-level interfaces for backend workloads.",
+      },
+      {
+        q: "When should you use Node.js?",
+        a: "Use Node for APIs, gateways, BFFs, streaming systems, real-time apps, and I/O-bound services with high concurrency. It is strongest where throughput depends on waiting for network or storage rather than heavy CPU computation.",
+      },
+      {
+        q: "When should you NOT use Node.js?",
+        a: "Avoid Node as the primary execution model for CPU-bound analytics, heavy image/video processing, or scientific computation unless you isolate those workloads. The failure mode is event loop starvation that hurts every request in the process.",
+      },
+      {
+        q: "What does single-threaded mean in Node.js?",
+        a: "Application JavaScript runs on one main thread per process, so only one piece of JS executes at a time there. That does not mean the system cannot handle concurrency; it means concurrency is coordinated around asynchronous completion rather than many application threads.",
+      },
+      {
+        q: "What is non-blocking I/O?",
+        a: "Non-blocking I/O means the process initiates I/O work and continues doing other work instead of waiting synchronously for completion. This is the core reason Node can handle many in-flight operations efficiently.",
+      },
+      {
+        q: "What is event-driven architecture in Node.js?",
+        a: "Node is naturally event-driven because progress is triggered by I/O completions, timers, streams, and message callbacks rather than sequential blocking flows. That fits reactive systems well, but it also makes failure propagation and observability more important.",
+      },
+      {
+        q: "Callback vs Promise vs async/await",
+        a: "Callbacks are low-level and flexible but can become hard to compose; promises standardize async completion; async/await improves readability over promise chains. The tradeoff is that async/await can hide concurrency mistakes if engineers accidentally serialize independent work.",
+      },
+    ],
+  },
+  {
+    section: "Runtime Internals",
+    questions: [
+      {
+        q: "What is the event loop?",
+        a: "The event loop is the mechanism that coordinates timers, I/O callbacks, promise continuations, and other queued work inside a Node process. Understanding it matters because one blocked loop means one degraded process for every request sharing it.",
+      },
+      {
+        q: "What are the event loop phases in Node.js?",
+        a: "At a high level, Node cycles through timers, pending callbacks, idle/prepare, poll, check, and close callbacks, while also draining microtasks between turns. Senior engineers care because scheduling behavior affects fairness and tail latency under load.",
+      },
+      {
+        q: "What happens in the timers phase?",
+        a: "The timers phase executes callbacks scheduled by `setTimeout` and `setInterval` whose thresholds have elapsed. It does not guarantee exact timing; delays depend on event loop availability and other queued work.",
+      },
+      {
+        q: "What is the poll phase?",
+        a: "The poll phase is where Node waits for and processes I/O events. In many real workloads this is where most useful work becomes ready, so long synchronous handlers elsewhere can delay I/O readiness processing significantly.",
+      },
+      {
+        q: "What is the check phase?",
+        a: "The check phase runs callbacks scheduled by `setImmediate`. It is commonly used when work should be deferred until after I/O polling rather than inserted ahead of everything else.",
+      },
+      {
+        q: "What are close callbacks?",
+        a: "Close callbacks run when handles such as sockets or streams are closed. They matter in production because cleanup and connection lifecycle bugs often surface around shutdown and network churn.",
+      },
+      {
+        q: "process.nextTick vs setImmediate",
+        a: "`process.nextTick` runs before the event loop proceeds to the next phase, while `setImmediate` runs in the check phase. Overusing `nextTick` can starve I/O because it keeps inserting high-priority work ahead of the loop.",
+      },
+      {
+        q: "Microtask queue vs macrotask queue",
+        a: "Microtasks such as promise continuations run before the next event loop turn proceeds, while timers and I/O callbacks are macrotask-style scheduled work. This difference is why promise-heavy code can still monopolize execution if abused.",
+      },
+      {
+        q: "What is V8?",
+        a: "V8 is the JavaScript engine that parses, optimizes, and executes JS for Node. It is only one part of Node, but it explains runtime behavior around compilation, optimization, and memory management.",
+      },
+      {
+        q: "How does JS get compiled in V8?",
+        a: "V8 parses code into an AST, produces bytecode, and uses JIT optimization for hot paths. Performance depends on predictable code shapes and runtime behavior, not just source-level syntax.",
+      },
+      {
+        q: "What is JIT compilation?",
+        a: "JIT compilation means V8 can optimize frequently executed code paths at runtime based on observed behavior. The tradeoff is that unstable shapes or deoptimizations can make performance less predictable under changing workloads.",
+      },
+      {
+        q: "What are hidden classes?",
+        a: "Hidden classes are internal V8 structures used to optimize property access for objects with stable shapes. Frequent object shape mutations can reduce optimization effectiveness and contribute to performance noise.",
+      },
+      {
+        q: "Garbage collection basics in Node.js",
+        a: "V8 reclaims unreachable memory automatically, but GC pauses and heap pressure still affect latency. Memory-heavy services need profiling because leaks or large short-lived allocations can destabilize tail performance.",
+      },
+      {
+        q: "What is libuv?",
+        a: "libuv is the C library that underpins Node’s event loop, async I/O abstractions, and thread pool behavior. It is why Node can present a consistent cross-platform asynchronous programming model.",
+      },
+      {
+        q: "What is the role of the libuv thread pool?",
+        a: "The thread pool handles selected operations such as filesystem work, parts of DNS, and crypto that cannot rely purely on kernel event notifications. Saturating it can hurt throughput for unrelated tasks using the same pool.",
+      },
+      {
+        q: "Why can fs.readFile be async?",
+        a: "Node delegates the work to underlying OS facilities or libuv worker threads so the main JS thread does not block waiting for file I/O. Async at the API level does not mean the hardware operation is magically parallelized in JS itself.",
+      },
+      {
+        q: "Why do DNS and crypto often use the thread pool?",
+        a: "Some DNS resolution and crypto tasks are blocking or CPU-expensive from the runtime’s perspective, so Node routes them through libuv workers. This is a common source of contention in authentication-heavy or certificate-heavy services.",
+      },
+    ],
+  },
+  {
+    section: "Performance, Scaling & Production Systems",
+    questions: [
+      {
+        q: "How does Node handle thousands of connections?",
+        a: "It multiplexes many sockets and async operations on the event loop rather than assigning a thread per connection. This is efficient for I/O-heavy workloads, but only as long as request handlers stay non-blocking.",
+      },
+      {
+        q: "What are the tradeoffs of Promise.all?",
+        a: "Promise.all reduces end-to-end latency for independent tasks, but it can also amplify downstream pressure and memory usage if too many operations are launched at once. Concurrency without limits is not the same as controlled throughput.",
+      },
+      {
+        q: "What is backpressure in Node streams?",
+        a: "Backpressure is how consumers signal producers to slow down when downstream processing cannot keep up. Without it, memory grows, latency spikes, and pipelines fail under load.",
+      },
+      {
+        q: "What are streams in Node.js?",
+        a: "Streams process data incrementally instead of buffering entire payloads in memory. They are a core tool for large files, proxying, ETL flows, and anything where bounded memory matters.",
+      },
+      {
+        q: "Readable vs Writable vs Duplex streams",
+        a: "Readable streams emit data, writable streams consume data, and duplex streams do both. This matters architecturally because it determines where buffering, transformation, and backpressure control actually happen.",
+      },
+      {
+        q: "Why use stream.pipeline?",
+        a: "Pipeline connects streams with proper error forwarding and cleanup semantics. It is safer than manually wiring `pipe()` chains in production because partial failure handling is otherwise easy to get wrong.",
+        code: `import { pipeline } from "node:stream/promises";
+\nawait pipeline(sourceStream, transformStream, destinationStream);`,
+      },
+      {
+        q: "Worker Threads vs Child Process",
+        a: "Worker threads are better for CPU work sharing memory in one process, while child processes provide stronger isolation and separate memory spaces. The choice depends on failure isolation, payload transfer cost, and operational model.",
+      },
+      {
+        q: "What is the purpose of the Cluster module?",
+        a: "Cluster lets multiple Node processes share a port so one host can use multiple CPU cores. It improves utilization, but container orchestration often becomes the cleaner scaling primitive at platform level.",
+      },
+      {
+        q: "CommonJS vs ES Modules",
+        a: "CommonJS is synchronous and historically dominant in Node, while ES Modules align with the JavaScript standard and support static analysis better. Mixed module ecosystems still create friction in tooling and packaging.",
+      },
+      {
+        q: "require vs import",
+        a: "`require` loads CommonJS modules dynamically at runtime, while `import` is part of the ES module system with static structure and different resolution semantics. The engineering concern is compatibility, tooling, and package boundary clarity.",
+      },
+      {
+        q: "What is module caching?",
+        a: "Node caches loaded modules so repeated imports do not re-execute the module body. This improves efficiency, but it also means mutable module-level state can quietly become shared state across the process.",
+      },
+      {
+        q: "Why do circular dependencies cause pain?",
+        a: "Circular dependencies can produce partially initialized modules and confusing runtime behavior. In large codebases they usually signal poor boundary design rather than just an import syntax issue.",
+      },
+      {
+        q: "Why use package.json exports?",
+        a: "The `exports` field defines the public surface of a package more explicitly and improves encapsulation. It helps prevent consumers from depending on internal files that later become impossible to refactor safely.",
+      },
+      {
+        q: "Why do Node apps become slow?",
+        a: "Most slow Node apps are not limited by JavaScript syntax but by blocking CPU work, poor I/O coordination, excessive serialization, memory pressure, or overloaded downstream services. The real task is finding which one dominates p95 and p99 latency.",
+      },
+      {
+        q: "CPU-bound vs IO-bound workloads",
+        a: "Node excels at I/O-bound workloads because the event loop can keep progressing while work waits on external systems. CPU-bound work should be isolated, otherwise it degrades every concurrent request sharing that process.",
+      },
+      {
+        q: "How do you profile Node.js apps?",
+        a: "Use CPU profiles, heap snapshots, event loop lag metrics, flamegraphs, and request tracing together. Single-tool profiling often misses whether the real issue is JS CPU, GC, I/O wait, or dependency latency.",
+      },
+      {
+        q: "Examples of event loop blocking",
+        a: "Large JSON serialization, synchronous crypto, regex catastrophes, image transforms, and huge in-memory loops can all block the loop. The production symptom is rising latency on otherwise simple requests.",
+      },
+      {
+        q: "How do you detect memory leaks?",
+        a: "Track heap growth over time, inspect retained objects, and correlate leaks with request patterns or feature flags. Common causes include unbounded caches, listener leaks, orphaned timers, and closure-retained state.",
+      },
+      {
+        q: "Heap vs stack in Node.js",
+        a: "The stack holds call frames and local execution context, while the heap stores dynamically allocated objects. Most production memory problems in Node are heap-related because long-lived object retention is the usual failure mode.",
+      },
+      {
+        q: "How do you optimize APIs under load?",
+        a: "Focus on efficient query patterns, bounded concurrency, compression only when justified, response shaping, caching, and reducing blocking work. Optimizing the wrong layer just moves bottlenecks downstream.",
+      },
+      {
+        q: "How should Node services scale horizontally?",
+        a: "Keep services stateless, run multiple instances behind a load balancer, externalize sessions and caches, and use queues for expensive workflows. Horizontal scaling only works cleanly when process-local state is not required for correctness.",
+      },
+      {
+        q: "PM2 vs Docker vs Kubernetes",
+        a: "PM2 helps with process supervision on a host, Docker standardizes packaging and runtime isolation, and Kubernetes manages orchestration, scaling, and rollout across many hosts. The choice depends on operational maturity and platform needs.",
+      },
+      {
+        q: "What is the sticky sessions issue?",
+        a: "Sticky sessions tie clients to specific instances, which complicates scaling and failover because state is no longer freely movable. For most APIs, externalizing session or connection state is a cleaner design.",
+      },
+      {
+        q: "Redis with Node.js",
+        a: "Redis is commonly used for caching, rate limiting, distributed locks, and ephemeral shared state. It helps Node services stay stateless, but it can also become a central dependency that needs its own availability design.",
+      },
+      {
+        q: "In-memory cache tradeoffs",
+        a: "In-memory caches are fast and simple, but they fragment state across instances and vanish on restart. They are useful for local hot data, not for correctness-critical shared coordination.",
+      },
+      {
+        q: "API response caching considerations",
+        a: "Response caching works best for expensive reads with stable cache keys and acceptable staleness. The hard part is invalidation, not storage.",
+      },
+      {
+        q: "JWT vs Sessions in Node apps",
+        a: "JWTs simplify stateless auth distribution but complicate revocation and rotation. Sessions centralize control but require shared state infrastructure. The decision is operational and security-driven, not purely stylistic.",
+      },
+      {
+        q: "Why rate limit Node APIs?",
+        a: "Rate limiting protects finite process and downstream capacity from abuse and accidental client storms. In Node specifically, preventing overload is crucial because one saturated process degrades all requests sharing the loop.",
+      },
+      {
+        q: "What is Helmet for?",
+        a: "Helmet helps apply security headers in Node web apps. It is useful, but it is only one layer of transport security and does not replace validation, auth, or secure deployment controls.",
+      },
+      {
+        q: "Input validation and injection prevention",
+        a: "All external input should be validated for shape and meaning before use, and database access should use parameterized queries or safe query builders. Node is especially exposed to supply-chain and injection issues when teams rely too heavily on convenience packages.",
+      },
+      {
+        q: "How should env vars and npm dependency risk be handled?",
+        a: "Environment variables should be treated as sensitive configuration, loaded minimally, and rotated safely. Dependency vulnerabilities require lockfiles, auditing, update discipline, and skepticism toward untrusted packages because npm supply-chain risk is real.",
+      },
+      {
+        q: "Node with PostgreSQL or MongoDB",
+        a: "The runtime works well with both, but the data model should drive the choice. PostgreSQL fits relational transactional systems; MongoDB fits document-heavy aggregate access. The Node layer must respect pooling, backpressure, and query efficiency either way.",
+      },
+      {
+        q: "Why does connection pooling matter for Node?",
+        a: "Because a highly concurrent Node service can overwhelm a database with too many fresh connections or parallel queries. Pool limits are effectively part of application flow control.",
+      },
+      {
+        q: "ORM vs query builders in Node",
+        a: "ORMs improve productivity and consistency, while query builders give more visibility and control over generated SQL. The right choice depends on team skill, complexity of queries, and tolerance for abstraction leakage.",
+      },
+      {
+        q: "How should transactions be handled?",
+        a: "Transactions should be scoped to business operations with clear retry and error semantics. In Node, the main risk is hiding too much transaction logic inside handlers without visibility into contention and rollback paths.",
+      },
+      {
+        q: "How should graceful shutdown work?",
+        a: "On shutdown, stop accepting new traffic, let in-flight work finish within bounds, close connections cleanly, and flush telemetry where practical. Abrupt exits cause dropped requests, duplicate jobs, and inconsistent visibility during incidents.",
+      },
+      {
+        q: "Why does SIGTERM handling matter in containers?",
+        a: "Containers are often terminated with SIGTERM before forced shutdown. If the process ignores it, deployments and autoscaling can drop in-flight requests or leave stateful work half-done.",
+      },
+      {
+        q: "Zero downtime deployments with Node",
+        a: "Zero downtime depends on readiness probes, graceful drain, backward-compatible changes, and rollout strategy. The application must cooperate with the platform or deployment safety is mostly an illusion.",
+      },
+      {
+        q: "Unhandled promise rejections",
+        a: "Unhandled rejections indicate async failures escaping the intended control path. In production, teams should treat them seriously because they often signal correctness bugs, observability blind spots, or unsafe process state after failure.",
+      },
+      {
+        q: "What is process.nextTick starvation?",
+        a: "If code schedules too much work with `process.nextTick`, it can prevent the event loop from progressing to I/O and timers. This is a classic fairness bug that only shows up under real workload pressure.",
+      },
+      {
+        q: "OpenTelemetry observability in Node",
+        a: "OpenTelemetry helps capture traces, metrics, and context propagation across async flows. In Node this matters because debugging concurrent distributed systems without correlation IDs and spans becomes guesswork quickly.",
+      },
+    ],
+  },
+  {
+    section: "Advanced Architecture Patterns",
+    questions: [
+      {
+        q: "Microservices with Node.js",
+        a: "Node works well for microservices when service boundaries are clean and most work is I/O-centric. The failure mode is creating many tiny services with shared libraries and unclear ownership, which amplifies operational cost.",
+      },
+      {
+        q: "Queue systems with RabbitMQ or Kafka",
+        a: "Queues decouple request paths from slow or bursty work. RabbitMQ is strong for task routing and acknowledgements; Kafka is stronger for durable event streams and replay. The choice should follow delivery semantics and consumption patterns.",
+      },
+      {
+        q: "Event-driven systems in Node",
+        a: "Node is a natural fit for event-driven systems because async composition is already part of the runtime model. The tradeoff is that debugging, ordering, and consistency become harder as workflows spread across many events and consumers.",
+      },
+      {
+        q: "WebSockets architecture in Node.js",
+        a: "WebSockets fit Node well for chat, collaboration, and live dashboards, but they introduce connection state, fan-out design, sticky session concerns, and backpressure management. The architecture should separate connection handling from durable business events.",
+      },
+      {
+        q: "How would you think about a real-time chat system in Node?",
+        a: "Focus on connection management, message durability, delivery acknowledgements, ordering, offline sync, and fan-out strategy. Node can handle the connection layer well, but persistence and cross-instance routing must be designed explicitly.",
+      },
+      {
+        q: "GraphQL with Node.js tradeoffs",
+        a: "GraphQL gives clients flexible reads, but it increases resolver complexity, N+1 risk, caching difficulty, and authorization subtlety. Node teams need disciplined resolver composition and batching to avoid self-inflicted performance problems.",
+      },
+      {
+        q: "What is the BFF pattern?",
+        a: "A Backend For Frontend tailors backend aggregation and policy to a specific client experience. Node is a strong fit because it handles concurrent API composition well, but BFF sprawl can become a maintenance issue if boundaries are not clear.",
+      },
+      {
+        q: "What is the role of an API Gateway with Node services?",
+        a: "An API gateway centralizes auth, throttling, observability, and routing in front of services. It helps keep Node services focused on domain logic, but if overloaded with business behavior it becomes a brittle platform bottleneck.",
+      },
+      {
+        q: "How would you design a scalable chat backend with Node.js?",
+        a: "Use stateless API nodes for auth and metadata, dedicated websocket connection handling, a durable message store, and pub/sub for cross-instance fan-out. The hard problems are ordering, reconnection, and presence consistency.",
+      },
+      {
+        q: "How would you design a notifications service?",
+        a: "Put durable queues between producers and channel workers, model retries and dead letters explicitly, and separate user preference logic from delivery workers. Bottlenecks usually appear in fan-out volume and third-party provider instability.",
+      },
+      {
+        q: "How would you design a job queue processor in Node?",
+        a: "Keep API processes separate from workers, enforce bounded concurrency, make handlers idempotent, and instrument queue lag and retry patterns. Node is effective here if CPU-heavy jobs are isolated from the main event-loop services.",
+      },
+      {
+        q: "How would you design a file upload service?",
+        a: "Stream uploads instead of buffering them in memory, validate type and size early, and hand off scanning or transformations asynchronously. The failure modes are memory blowups, slow downstream storage, and inconsistent cleanup on partial uploads.",
+      },
+      {
+        q: "How would you design a real-time dashboard?",
+        a: "Separate ingest, aggregation, and websocket delivery. Node is well suited to delivery and API layers, but metrics aggregation often needs a store or stream processor optimized for time-series queries.",
+      },
+      {
+        q: "How would you design a URL shortener in Node.js?",
+        a: "Optimize the write path for key generation and the read path for low-latency redirection with aggressive caching. Node is a good fit for the HTTP layer, but data model, abuse prevention, and hot-key handling dominate scalability.",
+      },
+      {
+        q: "Bun vs Node vs Deno comparison",
+        a: "Node remains the most mature ecosystem choice for production backend systems. Bun is promising for speed and tooling integration, and Deno improves security defaults and developer ergonomics, but ecosystem maturity and operational confidence still matter more than benchmark headlines.",
       },
     ],
   },

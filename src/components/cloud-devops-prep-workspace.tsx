@@ -241,8 +241,10 @@ export function CloudDevopsPrepWorkspace() {
                     GCP Commands
                   </h2>
                   <p className="mt-2 text-sm text-[var(--color-text-muted)]">
-                    Practical GCP CLI references for architecture and platform interviews.
+                    Practical GCP CLI references plus Cloud Run deployment snippets for platform
+                    interviews.
                   </p>
+
                   <div className="mt-5 overflow-hidden rounded-[24px] border border-[var(--color-border)] bg-[#09111f]">
                     <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
                       <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
@@ -256,6 +258,34 @@ export function CloudDevopsPrepWorkspace() {
                       <code>{activeTopic.commands.join("\n")}</code>
                     </pre>
                   </div>
+
+                  {activeTopic.references ? (
+                    <div className="mt-5 grid gap-5">
+                      {activeTopic.references.map((reference) => (
+                        <article
+                          key={reference.title}
+                          className="overflow-hidden rounded-[24px] border border-[var(--color-border)] bg-[#09111f]"
+                        >
+                          <div className="border-b border-[var(--color-border)] px-4 py-4">
+                            <div className="flex items-center justify-between gap-4">
+                              <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white">
+                                {reference.title}
+                              </h3>
+                              <span className="font-mono text-xs text-[var(--color-text-secondary)]">
+                                {reference.language}
+                              </span>
+                            </div>
+                            <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                              {reference.description}
+                            </p>
+                          </div>
+                          <pre className="overflow-x-auto px-4 py-4 font-mono text-sm leading-7 text-slate-200">
+                            <code>{reference.code}</code>
+                          </pre>
+                        </article>
+                      ))}
+                    </div>
+                  ) : null}
                 </section>
               ) : null}
 

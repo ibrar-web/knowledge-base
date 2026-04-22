@@ -6,6 +6,9 @@ import {
   cicdInterviewSections,
   devopsTopics,
   dockerInterviewSections,
+  gitInterviewSections,
+  type CommandReference,
+  type CodeReference,
 } from "@/data/devops-prep";
 
 export function DevopsPrepWorkspace() {
@@ -16,6 +19,7 @@ export function DevopsPrepWorkspace() {
   const [cicdPanel, setCicdPanel] = useState<"commands" | "concepts" | "questions">(
     "questions"
   );
+  const [gitPanel, setGitPanel] = useState<"commands" | "concepts" | "questions">("questions");
   const [openQuestion, setOpenQuestion] = useState<string | null>(
     `docker-${dockerInterviewSections[0]?.section}-0`
   );
@@ -33,8 +37,9 @@ export function DevopsPrepWorkspace() {
             Senior DevOps Interview Master System
           </h1>
           <p className="mt-4 text-base leading-7 text-[var(--color-text-secondary)] sm:text-lg">
-            Switch between Docker and CI/CD to review production-oriented commands, senior
-            interview questions, and core DevOps delivery concepts in one workspace.
+            Switch between Docker, CI/CD, and Git to review production-oriented commands,
+            collaboration workflows, Docker artifacts, troubleshooting patterns, and senior
+            DevOps interview questions in one workspace.
           </p>
         </div>
 
@@ -95,11 +100,18 @@ export function DevopsPrepWorkspace() {
               </div>
 
               {dockerPanel === "commands" ? (
-                <CommandSection
+                <CommandListSection
                   title="Docker Commands"
-                  description="Practical Docker CLI references for platform and DevOps interviews."
-                  code={activeTopic.commands.join("\n")}
-                  codeLabel="bash"
+                  description="Practical Docker CLI references with clear operational context for platform and DevOps interviews."
+                  commands={activeTopic.commands}
+                />
+              ) : null}
+
+              {dockerPanel === "commands" && activeTopic.references ? (
+                <ReferenceSection
+                  title="Docker Build References"
+                  description="Production-oriented Docker artifacts for containerized application builds and local multi-service environments."
+                  references={activeTopic.references}
                 />
               ) : null}
 
@@ -122,7 +134,7 @@ export function DevopsPrepWorkspace() {
                 />
               ) : null}
             </div>
-          ) : (
+          ) : activeTopic.id === "cicd" ? (
             <div className="space-y-6">
               <div className="flex flex-wrap gap-3">
                 {[
@@ -152,12 +164,20 @@ export function DevopsPrepWorkspace() {
               </div>
 
               {cicdPanel === "commands" ? (
-                <CommandSection
-                  title="CI/CD Workflow"
-                  description="Practical workflow reference for delivery and platform interviews."
-                  code={activeTopic.commands.join("\n")}
-                  codeLabel="yaml"
-                />
+                activeTopic.references ? (
+                  <ReferenceSection
+                    title="CI/CD Workflow References"
+                    description="GitHub Actions workflow plus the VM deployment script needed to run a FastAPI app on a GCP VM via systemd."
+                    references={activeTopic.references}
+                  />
+                ) : (
+                  <CommandSection
+                    title="CI/CD Workflow"
+                    description="Practical workflow reference for delivery and platform interviews."
+                    code={activeTopic.commands.map((item) => item.command).join("\n")}
+                    codeLabel="yaml/bash"
+                  />
+                )
               ) : null}
 
               {cicdPanel === "concepts" ? (
@@ -176,6 +196,62 @@ export function DevopsPrepWorkspace() {
                   openQuestion={openQuestion}
                   setOpenQuestion={setOpenQuestion}
                   prefix="cicd"
+                />
+              ) : null}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="flex flex-wrap gap-3">
+                {[
+                  { id: "commands", label: "Commands" },
+                  { id: "concepts", label: "Core Concepts" },
+                  { id: "questions", label: "Interview Bank" },
+                ].map((panel) => {
+                  const isActive = gitPanel === panel.id;
+
+                  return (
+                    <button
+                      key={panel.id}
+                      type="button"
+                      onClick={() =>
+                        setGitPanel(panel.id as "commands" | "concepts" | "questions")
+                      }
+                      className={`rounded-2xl border px-4 py-2.5 text-sm font-semibold transition duration-200 ${
+                        isActive
+                          ? "border-[var(--color-primary-blue)] bg-[color-mix(in_srgb,var(--color-primary-blue)_18%,transparent)] text-white"
+                          : "border-[var(--color-border)] bg-white/5 text-[var(--color-text-secondary)] hover:border-[var(--color-primary-indigo)] hover:bg-white/10 hover:text-[var(--color-text-primary)]"
+                      }`}
+                    >
+                      {panel.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {gitPanel === "commands" ? (
+                <CommandListSection
+                  title="Git Daily Commands"
+                  description="Practical Git commands with workflow context for repository setup, collaboration, history management, and recovery."
+                  commands={activeTopic.commands}
+                />
+              ) : null}
+
+              {gitPanel === "concepts" ? (
+                <ConceptSection
+                  title="Git Core Concepts"
+                  description="Fast review topics for senior engineering collaboration, branching strategy, and source-control recovery."
+                  concepts={activeTopic.concepts}
+                />
+              ) : null}
+
+              {gitPanel === "questions" ? (
+                <QuestionSection
+                  title="Git Interview Question Bank"
+                  description="Senior-level Git topics covering distributed version control, daily collaboration workflows, history rewriting, and advanced troubleshooting commands."
+                  sections={gitInterviewSections}
+                  openQuestion={openQuestion}
+                  setOpenQuestion={setOpenQuestion}
+                  prefix="git"
                 />
               ) : null}
             </div>
@@ -211,6 +287,82 @@ function CommandSection({
         <pre className="overflow-x-auto px-4 py-4 font-mono text-sm leading-7 text-slate-200">
           <code>{code}</code>
         </pre>
+      </div>
+    </section>
+  );
+}
+
+function CommandListSection({
+  title,
+  description,
+  commands,
+}: {
+  title: string;
+  description: string;
+  commands: CommandReference[];
+}) {
+  return (
+    <section className="rounded-[28px] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-card)_78%,transparent)] p-6">
+      <h2 className="text-2xl font-semibold tracking-tight text-white">{title}</h2>
+      <p className="mt-2 text-sm text-[var(--color-text-muted)]">{description}</p>
+      <div className="mt-6 grid gap-4">
+        {commands.map((item) => (
+          <article
+            key={item.command}
+            className="overflow-hidden rounded-[24px] border border-[var(--color-border)] bg-[#09111f]"
+          >
+            <div className="border-b border-[var(--color-border)] px-4 py-3">
+              <span className="font-mono text-sm text-slate-200">{item.command}</span>
+            </div>
+            <div className="px-4 py-4">
+              <p className="text-sm leading-7 text-[var(--color-text-secondary)]">
+                {item.description}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ReferenceSection({
+  title,
+  description,
+  references,
+}: {
+  title: string;
+  description: string;
+  references: CodeReference[];
+}) {
+  return (
+    <section className="rounded-[28px] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-card)_78%,transparent)] p-6">
+      <h2 className="text-2xl font-semibold tracking-tight text-white">{title}</h2>
+      <p className="mt-2 text-sm text-[var(--color-text-muted)]">{description}</p>
+      <div className="mt-6 grid gap-5">
+        {references.map((reference) => (
+          <article
+            key={reference.title}
+            className="overflow-hidden rounded-[24px] border border-[var(--color-border)] bg-[#09111f]"
+          >
+            <div className="border-b border-[var(--color-border)] px-4 py-4">
+              <div className="flex items-center justify-between gap-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white">
+                  {reference.title}
+                </h3>
+                <span className="font-mono text-xs text-[var(--color-text-secondary)]">
+                  {reference.language}
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                {reference.description}
+              </p>
+            </div>
+            <pre className="overflow-x-auto px-4 py-4 font-mono text-sm leading-7 text-slate-200">
+              <code>{reference.code}</code>
+            </pre>
+          </article>
+        ))}
       </div>
     </section>
   );
@@ -253,7 +405,10 @@ function QuestionSection({
 }: {
   title: string;
   description: string;
-  sections: Array<{ section: string; questions: Array<{ q: string; a: string; code?: string }> }>;
+  sections: Array<{
+    section: string;
+    questions: Array<{ q: string; a: string; code?: string; command?: string }>;
+  }>;
   openQuestion: string | null;
   setOpenQuestion: React.Dispatch<React.SetStateAction<string | null>>;
   prefix: string;
@@ -299,6 +454,18 @@ function QuestionSection({
                         <p className="text-sm leading-7 text-[var(--color-text-secondary)]">
                           {question.a}
                         </p>
+                        {question.command ? (
+                          <div className="mt-4 overflow-hidden rounded-[18px] border border-[var(--color-border)] bg-[#09111f]">
+                            <div className="border-b border-[var(--color-border)] px-4 py-2.5">
+                              <span className="font-mono text-xs uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
+                                Command
+                              </span>
+                            </div>
+                            <pre className="overflow-x-auto px-4 py-4 font-mono text-xs leading-6 text-slate-200">
+                              <code>{question.command}</code>
+                            </pre>
+                          </div>
+                        ) : null}
                         {question.code ? (
                           <pre className="mt-4 overflow-x-auto rounded-[18px] border border-[var(--color-border)] bg-[#09111f] px-4 py-4 font-mono text-xs leading-6 text-slate-200">
                             <code>{question.code}</code>
