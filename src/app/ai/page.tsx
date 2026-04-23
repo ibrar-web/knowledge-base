@@ -1,5 +1,5 @@
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { AIPrepWorkspace } from "@/components/ai-prep-workspace";
 
 export default function AIPage() {
-  return <PlaceholderPage title="AI" />;
+  return <AIPrepWorkspace />;
 }
