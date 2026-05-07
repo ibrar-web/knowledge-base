@@ -9,6 +9,7 @@ import {
   gitInterviewSections,
   type CommandReference,
   type CodeReference,
+  type DeploymentStep,
 } from "@/data/devops-prep";
 
 export function DevopsPrepWorkspace() {
@@ -37,9 +38,9 @@ export function DevopsPrepWorkspace() {
             Senior DevOps Interview Master System
           </h1>
           <p className="mt-4 text-base leading-7 text-[var(--color-text-secondary)] sm:text-lg">
-            Switch between Docker, CI/CD, and Git to review production-oriented commands,
-            collaboration workflows, Docker artifacts, troubleshooting patterns, and senior
-            DevOps interview questions in one workspace.
+            Switch between Docker, CI/CD, PostgreSQL deployment, and Git to review
+            production-oriented commands, collaboration workflows, Docker artifacts,
+            troubleshooting patterns, and senior DevOps interview questions in one workspace.
           </p>
         </div>
 
@@ -199,6 +200,12 @@ export function DevopsPrepWorkspace() {
                 />
               ) : null}
             </div>
+          ) : activeTopic.id === "postgres" ? (
+            <DeploymentStepSection
+              title="PostgreSQL Deployment On AWS"
+              description="Step-by-step RDS or Aurora PostgreSQL setup for creating a database instance and allowing local pgAdmin access."
+              steps={activeTopic.deploymentSteps ?? []}
+            />
           ) : (
             <div className="space-y-6">
               <div className="flex flex-wrap gap-3">
@@ -259,6 +266,56 @@ export function DevopsPrepWorkspace() {
         </div>
       </section>
     </main>
+  );
+}
+
+function DeploymentStepSection({
+  title,
+  description,
+  steps,
+}: {
+  title: string;
+  description: string;
+  steps: DeploymentStep[];
+}) {
+  return (
+    <section className="rounded-[28px] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-card)_78%,transparent)] p-6">
+      <h2 className="text-2xl font-semibold tracking-tight text-white">{title}</h2>
+      <p className="mt-2 text-sm text-[var(--color-text-muted)]">{description}</p>
+      <ol className="mt-6 grid gap-4">
+        {steps.map((step, index) => (
+          <li
+            key={step.title}
+            className="rounded-[24px] border border-[var(--color-border)] bg-[#09111f] p-5"
+          >
+            <div className="flex gap-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-white/5 font-mono text-sm font-semibold text-slate-200">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-base font-semibold leading-6 text-white">{step.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-[var(--color-text-secondary)]">
+                  {step.description}
+                </p>
+                {step.details ? (
+                  <ul className="mt-3 space-y-2">
+                    {step.details.map((detail) => (
+                      <li
+                        key={detail}
+                        className="flex gap-2 text-sm leading-6 text-[var(--color-text-muted)]"
+                      >
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary-blue)]" />
+                        <span>{detail}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 

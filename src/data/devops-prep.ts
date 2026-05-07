@@ -12,12 +12,19 @@ export type CommandReference = {
   description: string;
 };
 
+export type DeploymentStep = {
+  title: string;
+  description: string;
+  details?: string[];
+};
+
 export type DevopsTopic = {
-  id: "docker" | "cicd" | "git";
+  id: "docker" | "cicd" | "postgres" | "git";
   label: string;
   accent: string;
   commands: CommandReference[];
   concepts: string[];
+  deploymentSteps?: DeploymentStep[];
   references?: CodeReference[];
 };
 
@@ -443,6 +450,67 @@ main() {
 
 trap 'print_failure_logs' ERR
 main "$@"`,
+      },
+    ],
+  },
+  {
+    id: "postgres",
+    label: "PostgreSQL Deployment",
+    accent: "from-sky-500/20 via-cyan-500/10 to-emerald-500/20",
+    commands: [
+      {
+        command: "AWS Console > RDS > Create database",
+        description:
+          "Use the AWS console flow to create a managed PostgreSQL database through RDS or Aurora PostgreSQL.",
+      },
+      {
+        command: "Inbound rule: Custom TCP 5432 from <your-public-ip>/32",
+        description:
+          "Allow local pgAdmin access through the database security group. Prefer a single trusted IP over public access.",
+      },
+    ],
+    concepts: [
+      "Amazon RDS",
+      "Aurora PostgreSQL",
+      "Database instance sizing",
+      "Security groups",
+      "pgAdmin connectivity",
+    ],
+    deploymentSteps: [
+      {
+        title: "Search for RDS or Aurora",
+        description:
+          "Open the AWS console and search for RDS or Aurora, depending on whether you need standard managed PostgreSQL or the Aurora PostgreSQL engine.",
+      },
+      {
+        title: "Create the PostgreSQL database",
+        description:
+          "Select Create database, choose the database creation method, and select PostgreSQL from the engine options. Use Aurora PostgreSQL only when the project requires Aurora features.",
+      },
+      {
+        title: "Configure the database requirements",
+        description:
+          "Set the DB instance identifier, master username, password, instance class, storage, network, backups, monitoring, and any environment-specific requirements.",
+        details: [
+          "Keep production databases in private subnets when possible.",
+          "Store passwords in a secret manager instead of sharing them in plain text.",
+        ],
+      },
+      {
+        title: "Create the instance and wait",
+        description:
+          "Create the DB instance and wait until AWS shows the status as Available before trying to connect or update application configuration.",
+      },
+      {
+        title: "Allow local pgAdmin access",
+        description:
+          "Update the database security group inbound rules so your local machine can connect from pgAdmin.",
+        details: [
+          "Use PostgreSQL or Custom TCP as the rule type.",
+          "Set the port to 5432.",
+          "Use your public IP with /32 as the source for normal access.",
+          "Use 0.0.0.0/0 only for temporary testing, then remove it immediately because it allows all IPs.",
+        ],
       },
     ],
   },
